@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indian Grocery Shopping List Wizard (राशन सूची)</title>
+<style>
+  :root {
+    --bg: #FAF9F6;
+    --surface: #FFFFFF;
+    --surface-muted: #F3F1EC;
+    --border: #E2DED5;
+    --border-strong: #C9C3B6;
+    --text: #1F2421;
+    --text-muted: #5C635E;
+    --primary: #1B5E20;
+    --primary-hover: #144718;
+    --primary-soft: #E8F5E9;
+    --primary-border: #A5D6A7;
+    --accent: #D97706;
+    --accent-soft: #FEF3C7;
+    --danger: #B91C1C;
+    --danger-soft: #FEE2E2;
+    --shadow-sm: 0 1px 3px rgba(20, 30, 20, 0.06);
+    --shadow-md: 0 4px 12px rgba(20, 30, 20, 0.08);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(--font);
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding-bottom: 84px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Header */
+  .app-header {
+    background: var(--primary);
+    color: #FFFFFF;
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    box-shadow: var(--shadow-md);
+  }
+
+  .header-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .brand-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .brand-title h1 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .brand-title p {
+    font-size: 0.78rem;
+    opacity: 0.88;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cart-pill {
+    background: var(--accent);
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 7px 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    transition: transform 0.12s ease, background 0.15s ease;
+  }
+
+  .cart-pill:hover {
+    background: #B45309;
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost-light {
+    background: rgba(255, 255, 255, 0.14);
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    padding: 7px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.15s ease;
+  }
+
+  .btn-ghost-light:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
+
+  /* Stepper Navigation */
+  .stepper-wrap {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+  }
+
+  .stepper-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .stepper-track {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .step-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 13px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .step-pill:hover {
+    border-color: var(--primary);
+    color: var(--text);
+  }
+
+  .step-pill.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #FFFFFF;
+    box-shadow: 0 2px 6px rgba(27, 94, 32, 0.24);
+  }
+
+  .step-pill.has-items:not(.active) {
+    background: var(--primary-soft);
+    border-color: var(--primary-border);
+    color: var(--primary);
+  }
+
+  .step-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .step-pill.active .step-num {
+    background: rgba(255, 255, 255, 0.25);
+    color: #FFFFFF;
+  }
+
+  .step-count {
+    background: var(--accent);
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+
+  .step-pill.active .step-count {
+    background: #FFFFFF;
+    color: var(--primary);
+  }
+
+  /* Main Container */
+  .container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 20px 16px;
+  }
+
+  /* Category Header Banner */
+  .cat-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .cat-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cat-badge {
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--primary-border);
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+
+  .cat-header h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .cat-header p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .cat-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    position: relative;
+    min-width: 220px;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 9px 12px 9px 34px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    transition: border-color 0.15s ease;
+  }
+
+  .search-box input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #FFFFFF;
+  }
+
+  .search-box svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  /* Subcategory Section */
+  .subcat-section {
+    margin-bottom: 26px;
+  }
+
+  .subcat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .subcat-header h3 {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .subcat-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  /* Items Grid */
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+  }
+
+  .item-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    position: relative;
+  }
+
+  .item-card:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  .item-card.selected {
+    border-color: var(--primary);
+    background: #F4FBF4;
+  }
+
+  .item-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .item-name {
+    font-weight: 700;
+    font-size: 0.96rem;
+    color: var(--text);
+    line-height: 1.35;
+  }
+
+  .item-hindi {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+
+  .item-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--primary);
+    color: #FFFFFF;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .btn-clear-item {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+
+  .btn-clear-item:hover {
+    background: var(--danger-soft);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  /* Form Controls inside Card */
+  .field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .field-label {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .brand-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  select.control-select,
+  input.control-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-family: var(--font);
+    color: var(--text);
+    background: #FFFFFF;
+    transition: border-color 0.15s ease;
+  }
+
+  select.control-select:focus,
+  input.control-input:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  input.custom-brand-input {
+    border-color: var(--accent);
+    background: #FFFDF7;
+  }
+
+  /* Quantity Input Group */
+  .qty-input-group {
+    display: flex;
+    gap: 6px;
+    align-items: stretch;
+  }
+
+  .qty-input-group input.qty-text {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+  }
+
+  .qty-input-group select.unit-select {
+    width: 84px;
+    flex-shrink: 0;
+    font-weight: 600;
+    background: var(--surface-muted);
+  }
+
+  .qty-hint {
+    font-size: 0.73rem;
+    color: var(--primary);
+    font-weight: 600;
+    min-height: 16px;
+  }
+
+  /* Quick Preset Chips */
+  .preset-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 2px;
+  }
+
+  .chip-btn {
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+
+  .chip-btn:hover {
+    background: var(--primary-soft);
+    border-color: var(--primary-border);
+    color: var(--primary);
+  }
+
+  .chip-btn.active-chip {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #FFFFFF;
+  }
+
+  /* Add Custom Item Box */
+  .custom-item-panel {
+    background: var(--surface);
+    border: 1.5px dashed var(--primary-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-top: 20px;
+  }
+
+  .custom-item-panel h4 {
+    font-size: 0.95rem;
+    color: var(--primary);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .custom-item-form {
+    display: grid;
+    grid-template-columns: 1.3fr 1.1fr 1fr 1fr auto;
+    gap: 8px;
+    align-items: end;
+  }
+
+  @media (max-width: 820px) {
+    .custom-item-form {
+      grid-template-columns: 1fr 1fr;
+    }
+    .custom-item-form button {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.15s ease;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #FFFFFF;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-hover);
+  }
+
+  .btn-accent {
+    background: var(--accent);
+    color: #FFFFFF;
+  }
+
+  .btn-accent:hover {
+    background: #B45309;
+  }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+
+  .btn-secondary:hover {
+    background: var(--surface-muted);
+  }
+
+  .btn-danger-outline {
+    background: #FFFFFF;
+    color: var(--danger);
+    border-color: #FCA5A5;
+  }
+
+  .btn-danger-outline:hover {
+    background: var(--danger-soft);
+  }
+
+  /* Bottom Sticky Wizard Footer */
+  .wizard-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    z-index: 35;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .wizard-footer-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .footer-progress {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .footer-btns {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Summary / Review Page */
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+  }
+
+  .summary-topbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  .summary-title h2 {
+    font-size: 1.45rem;
+    color: var(--primary);
+    margin-bottom: 4px;
+  }
+
+  .summary-meta {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .summary-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .summary-cat-block {
+    margin-bottom: 22px;
+    break-inside: avoid;
+  }
+
+  .summary-cat-title {
+    background: var(--primary-soft);
+    color: var(--primary);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.98rem;
+    margin-bottom: 8px;
+    border-left: 4px solid var(--primary);
+  }
+
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+
+  .summary-table th {
+    text-align: left;
+    padding: 8px 10px;
+    background: var(--surface-muted);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1.5px solid var(--border);
+  }
+
+  .summary-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .summary-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .check-box-cell {
+    width: 38px;
+    text-align: center;
+  }
+
+  .print-checkbox {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid #4B5563;
+    border-radius: 3px;
+    vertical-align: middle;
+  }
+
+  .qty-pill-summary {
+    font-weight: 700;
+    color: var(--primary);
+    background: var(--primary-soft);
+    padding: 3px 9px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+  }
+
+  .empty-state h3 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+  }
+
+  .empty-state p {
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    top: 76px;
+    right: 20px;
+    background: #1F2937;
+    color: #FFFFFF;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.86rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-md);
+    z-index: 60;
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: all 0.2s ease;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Modal Dialog (Replacement for confirm) */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.52);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 80;
+    padding: 16px;
+  }
+
+  .modal-backdrop.open {
+    display: flex;
+  }
+
+  .modal-box {
+    background: #FFFFFF;
+    border-radius: var(--radius);
+    max-width: 420px;
+    width: 100%;
+    padding: 22px;
+    box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
+  }
+
+  .modal-box h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+
+  .modal-box p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 18px;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  /* Responsive Tweaks */
+  @media (max-width: 600px) {
+    .items-grid {
+      grid-template-columns: 1fr;
+    }
+    .footer-progress {
+      display: none;
+    }
+    .wizard-footer-inner {
+      justify-content: space-between;
+    }
+    .btn {
+      padding: 9px 13px;
+      font-size: 0.84rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-title">
+        <div class="brand-icon" aria-hidden="true">
+          <!-- Basket SVG Icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 11l4-7"/><path d="M19 11l-4-7"/><path d="M2 11h20"/>
+            <path d="M3.5 11l1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/>
+            <path d="M9 11l1 9"/><path d="M15 11l-1 9"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Indian Grocery Wizard (राशन सूची)</h1>
+          <p>Step-by-step monthly pantry planner &bull; 100% Offline</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" class="btn-ghost-light" id="btnResetTrigger" title="Clear all quantities">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+          </svg>
+          Reset
+        </button>
+        <button type="button" class="cart-pill" id="btnTopReview">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          <span>Review &amp; Export (<span id="topSelectedCount">0</span>)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Category Stepper -->
+  <nav class="stepper-wrap" aria-label="Grocery Categories">
+    <div class="stepper-inner">
+      <div class="stepper-track" id="stepperTrack"></div>
+    </div>
+  </nav>
+
+  <!-- Main Workspace -->
+  <main class="container" id="mainContainer"></main>
+
+  <!-- Sticky Wizard Navigation Footer -->
+  <footer class="wizard-footer" id="wizardFooter">
+    <div class="wizard-footer-inner">
+      <button type="button" class="btn btn-secondary" id="btnPrevStep">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Previous
+      </button>
+
+      <div class="footer-progress" id="footerProgressText">Step 1 of 9</div>
+
+      <div class="footer-btns">
+        <button type="button" class="btn btn-accent" id="btnQuickFinish">
+          Finish &amp; Review (<span id="footerSelectedCount">0</span>)
+        </button>
+        <button type="button" class="btn btn-primary" id="btnNextStep">
+          Next Category
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Feedback -->
+  <div class="toast" id="toastBox" role="status" aria-live="polite"></div>
+
+  <!-- Custom Reset Confirmation Modal -->
+  <div class="modal-backdrop" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-box">
+      <h3 id="modalTitle">Clear entire grocery list?</h3>
+      <p>This will remove all entered quantities and custom brand names across all categories.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="btnCancelReset">Cancel</button>
+        <button type="button" class="btn btn-danger-outline" id="btnConfirmReset">Yes, Clear All</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function () {
+  "use strict";
+
+  // =========================================================================
+  // 1. INDIAN GROCERY CATALOG DATA (Categories -> Subcategories -> Items)
+  // =========================================================================
+  const GROCERY_CATALOG = [
+    {
+      id: "pulses_grains",
+      name: "Pulses, Grains & Flours",
+      hindi: "दाल, अनाज और आटा",
+      description: "Select daily dals, legumes, rice, poha, and flours. Quantities default to kg.",
+      subcategories: [
+        {
+          id: "dals_pulses",
+          name: "Dals & Pulses (दालें और साबुत अनाज)",
+          items: [
+            { id: "toor_dal", name: "Toor / Arhar Dal", hindi: "अरहर / तूर दाल", defaultUnit: "kg", brands: ["Tata Sampann", "Premia", "Fortune", "Rajdhani", "Loose / Local"] },
+            { id: "chana_dal", name: "Chana Dal", hindi: "चना दाल", defaultUnit: "kg", brands: ["Tata Sampann", "Premia", "Rajdhani", "Fortune", "Loose / Local"] },
+            { id: "moong_dal", name: "Moong Dal (Yellow)", hindi: "मूंग दाल", defaultUnit: "kg", brands: ["Tata Sampann", "Premia", "Rajdhani", "Fortune", "Loose / Local"] },
+            { id: "urad_dal", name: "Urad Dal (White / Split)", hindi: "उड़द दाल", defaultUnit: "kg", brands: ["Tata Sampann", "Premia", "Rajdhani", "Loose / Local"] },
+            { id: "masoor_dal", name: "Masoor Dal / Malkha", hindi: "मसूर दाल / मलका", defaultUnit: "kg", brands: ["Tata Sampann", "Premia", "Rajdhani", "Loose / Local"] },
+            { id: "whole_masoor", name: "Whole Masoor (Black)", hindi: "साबुत मसूर", defaultUnit: "kg", brands: ["Tata Sampann", "Premia", "Loose / Local"] },
+            { id: "kabuli_chana", name: "Kabuli Chana (Chickpeas)", hindi: "काबुली चना", defaultUnit: "kg", brands: ["Premia", "Tata Sampann", "Rajdhani", "Loose / Local"] },
+            { id: "kala_chana", name: "Desi Kala Chana", hindi: "काला चना / देसी चना", defaultUnit: "kg", brands: ["Premia", "Tata Sampann", "Rajdhani", "Loose / Local"] },
+            { id: "rajma", name: "Rajma (Kidney Beans)", hindi: "राजमा", defaultUnit: "kg", brands: ["Premia", "Tata Sampann", "Rajdhani", "Loose / Local"] },
+            { id: "chawli_lobia", name: "Chawli / Lobia", hindi: "चौली / लोबिया", defaultUnit: "kg", brands: ["Premia", "Tata Sampann", "Loose / Local"] }
+          ]
+        },
+        {
+          id: "rice_poha",
+          name: "Rice, Poha & Daliya (चावल, पोहा और दलिया)",
+          items: [
+            { id: "daily_rice", name: "Daily Rice (Rozana)", hindi: "रोज़ाना चावल", defaultUnit: "kg", brands: ["India Gate", "Daawat", "Fortune", "Kohinoor", "Loose / Local"] },
+            { id: "basmati_rice", name: "Basmati Rice", hindi: "बासमती चावल", defaultUnit: "kg", brands: ["India Gate", "Daawat", "Fortune", "Kohinoor", "Loose / Local"] },
+            { id: "poha", name: "Poha (Flattened Rice)", hindi: "पोहा / चूड़ा", defaultUnit: "kg", brands: ["Tata Sampann", "Fortune", "Premia", "Rajdhani", "Loose / Local"] },
+            { id: "daliya", name: "Wheat Daliya (Porridge)", hindi: "गेहूं का दलिया", defaultUnit: "kg", brands: ["India Gate", "Patanjali", "Rajdhani", "Fortune", "Loose / Local"] },
+            { id: "makhana", name: "Phool Makhana (Fox Nuts)", hindi: "मखाना", defaultUnit: "g", brands: ["Nutraj", "Premia", "Farmley", "Loose / Local"] }
+          ]
+        },
+        {
+          id: "flours_sooji",
+          name: "Atta, Besan & Sooji (आटा, बेसन और सूजी)",
+          items: [
+            { id: "wheat_atta", name: "Whole Wheat Atta", hindi: "गेहूं का आटा", defaultUnit: "kg", brands: ["Aashirvaad", "Fortune Chakki Fresh", "Pillsbury", "Patanjali", "Chakki Fresh (Local)"] },
+            { id: "besan", name: "Besan (Gram Flour)", hindi: "बेसन", defaultUnit: "kg", brands: ["Rajdhani", "Fortune", "Tata Sampann", "Patanjali", "Loose / Local"] },
+            { id: "sooji", name: "Sooji / Rava (Semolina)", hindi: "सूजी / रवा", defaultUnit: "kg", brands: ["Fortune", "Rajdhani", "Premia", "Loose / Local"] },
+            { id: "kuttu_atta", name: "Kuttu Atta (Buckwheat)", hindi: "कुट्टू का आटा", defaultUnit: "g", brands: ["Pansari", "Rajdhani", "Premia", "Loose / Local"] },
+            { id: "maida", name: "Maida (Refined Flour)", hindi: "मैदा", defaultUnit: "kg", brands: ["Rajdhani", "Fortune", "Premia", "Loose / Local"] }
+          ]
+        }
+      ]
+    },
+    {
+      id: "oils_ghee_sugar",
+      name: "Oils, Ghee & Sugar",
+      hindi: "तेल, घी और चीनी",
+      description: "Cooking oils default to Liters (L), while Sugar, Ghee & Jaggery use kg/L.",
+      subcategories: [
+        {
+          id: "cooking_oils",
+          name: "Cooking Oils & Ghee (खाना पकाने का तेल और घी)",
+          items: [
+            { id: "mustard_oil", name: "Mustard Oil (Kachi Ghani)", hindi: "सरसों का तेल", defaultUnit: "L", brands: ["Fortune", "Dhara", "Patanjali", "Engine", "Borges", "Loose / Local"] },
+            { id: "sunflower_oil", name: "Sunflower Oil", hindi: "सूरजमुखी का तेल", defaultUnit: "L", brands: ["Fortune", "Saffola", "Sundrop", "Dhara", "Gemini"] },
+            { id: "rice_bran_oil", name: "Rice Bran Oil", hindi: "चावल की भूसी का तेल", defaultUnit: "L", brands: ["Fortune", "Saffola", "Freedom", "Patanjali"] },
+            { id: "groundnut_oil", name: "Groundnut Oil", hindi: "मूंगफली का तेल", defaultUnit: "L", brands: ["Fortune", "Dhara", "Gulab", "Loose / Local"] },
+            { id: "desi_ghee", name: "Desi Ghee", hindi: "देसी घी", defaultUnit: "L", brands: ["Amul", "Mother Dairy", "Patanjali", "Gowardhan", "Ananda", "Homemade / Local"] }
+          ]
+        },
+        {
+          id: "sugar_sweeteners",
+          name: "Sugar, Jaggery & Seeds (चीनी, गुड़ और तिलहन)",
+          items: [
+            { id: "sugar", name: "Sugar", hindi: "चीनी / शक्कर", defaultUnit: "kg", brands: ["Madhur", "Uttam Sugar", "Trust", "Premia", "Loose / Local"] },
+            { id: "jaggery", name: "Jaggery (Gur)", hindi: "गुड़", defaultUnit: "kg", brands: ["Premia", "Patanjali", "Organic Tattva", "Loose / Local"] },
+            { id: "groundnut_raw", name: "Raw Groundnuts / Peanuts", hindi: "कच्ची मूंगफली", defaultUnit: "g", brands: ["Premia", "Nutraj", "Loose / Local"] },
+            { id: "rai_mustard", name: "Rai / Mustard Seeds", hindi: "राई / सरसों के दाने", defaultUnit: "g", brands: ["Catch", "Everest", "Premia", "Loose / Local"] }
+          ]
+        }
+      ]
+    },
+    {
+      id: "spices_masala",
+      name: "Spices, Salt & Masala",
+      hindi: "मसाले और नमक",
+      description: "Everyday powdered spices, whole spices, blended masalas, and salt.",
+      subcategories: [
+        {
+          id: "salt_basic_spices",
+          name: "Salt & Basic Powdered Spices (नमक और पिसे मसाले)",
+          items: [
+            { id: "salt", name: "Iodized Salt", hindi: "नमक", defaultUnit: "kg", brands: ["Tata Salt", "Aashirvaad", "Catch", "Saffola"] },
+            { id: "turmeric", name: "Turmeric Powder (Haldi)", hindi: "हल्दी पाउडर", defaultUnit: "g", brands: ["Everest", "MDH", "Catch", "Tata Sampann", "Patanjali"] },
+            { id: "red_chilli", name: "Red Chilli Powder (Lal Mirch)", hindi: "लाल मिर्च पाउडर", defaultUnit: "g", brands: ["Everest", "MDH", "Catch", "Tata Sampann", "Ramdev"] },
+            { id: "deggi_mirch", name: "Deggi / Kashmiri Mirch", hindi: "देगी मिर्च / कश्मीरी मिर्च", defaultUnit: "g", brands: ["MDH", "Everest", "Catch", "Tata Sampann"] },
+            { id: "coriander_powder", name: "Coriander Powder (Dhaniya)", hindi: "धनिया पाउडर", defaultUnit: "g", brands: ["Shyam", "Everest", "MDH", "Catch", "Tata Sampann"] },
+            { id: "hing", name: "Asafoetida (Hing)", hindi: "हींग", defaultUnit: "g", brands: ["Tata Sampann", "Everest", "MDH", "Catch", "Ramdev"] }
+          ]
+        },
+        {
+          id: "whole_spices",
+          name: "Whole Spices (साबुत मसाले / खड़े मसाले)",
+          items: [
+            { id: "jeera", name: "Cumin Seeds (Whole Jeera)", hindi: "साबुत जीरा", defaultUnit: "g", brands: ["Catch", "Everest", "Premia", "Tata Sampann", "Loose / Local"] },
+            { id: "black_pepper", name: "Black Pepper (Kali Mirch)", hindi: "काली मिर्च", defaultUnit: "g", brands: ["Catch", "Everest", "Premia", "Loose / Local"] },
+            { id: "cardamom", name: "Green Cardamom (Choti Elaichi)", hindi: "हरी इलायची", defaultUnit: "g", brands: ["Nutraj", "Catch", "Everest", "Premia", "Loose / Local"] },
+            { id: "whole_garam_masala", name: "Whole Garam Masala Mix", hindi: "साबुत गरम मसाला", defaultUnit: "g", brands: ["Catch", "Everest", "Premia", "Loose / Local"] }
+          ]
+        },
+        {
+          id: "blended_masalas",
+          name: "Blended & Specialty Masalas (गरम और खास मसाले)",
+          items: [
+            { id: "garam_masala", name: "Garam Masala Powder", hindi: "गरम मसाला", defaultUnit: "g", brands: ["MDH", "Everest", "Catch", "Tata Sampann", "Badshah"] },
+            { id: "maggi_masala", name: "Maggi Masala-ae-Magic", hindi: "मैगी मसाला मैजिक", defaultUnit: "pkt", brands: ["Maggi"] },
+            { id: "pav_bhaji_masala", name: "Pav Bhaji Masala", hindi: "पाव भाजी मसाला", defaultUnit: "g", brands: ["Everest", "MDH", "Badshah", "Catch"] },
+            { id: "kitchen_king", name: "Kitchen King / Sabzi Masala", hindi: "किचन किंग / सब्ज़ी मसाला", defaultUnit: "g", brands: ["MDH", "Everest", "Catch", "Tata Sampann"] },
+            { id: "chicken_masala", name: "Chicken / Meat Masala", hindi: "चिकन मसाला", defaultUnit: "g", brands: ["MDH", "Everest", "Catch", "Badshah"] },
+            { id: "lucknowi_masala", name: "Lucknowi / Biryani Masala", hindi: "लखनवी / बिरयानी मसाला", defaultUnit: "g", brands: ["Badshah", "Everest", "MDH", "Shan"] }
+          ]
+        }
+      ]
+    },
+    {
+      id: "dry_fruits",
+      name: "Dry Fruits, Nuts & Seeds",
+      hindi: "सूखे मेवे और बीज",
+      description: "Almonds, walnuts, cashews, raisins, and dry coconut.",
+      subcategories: [
+        {
+          id: "nuts_raisins",
+          name: "Nuts & Dry Fruits (बादाम, अखरोट और मेवे)",
+          items: [
+            { id: "badam", name: "Almonds (Badam)", hindi: "बादाम", defaultUnit: "g", brands: ["Nutraj", "Tulsi", "Farmley", "Premia", "Happilo", "Loose / Local"] },
+            { id: "akhrot", name: "Walnuts (Whole / Kernels)", hindi: "अखरोट", defaultUnit: "g", brands: ["Nutraj", "Tulsi", "Farmley", "Premia", "Loose / Local"] },
+            { id: "kaju", name: "Cashews (Kaju)", hindi: "काजू", defaultUnit: "g", brands: ["Nutraj", "Tulsi", "Farmley", "Premia", "Loose / Local"] },
+            { id: "kishmish", name: "Raisins (Kishmish)", hindi: "किशमिश", defaultUnit: "g", brands: ["Nutraj", "Premia", "Farmley", "Loose / Local"] },
+            { id: "dry_coconut", name: "Dry Coconut (Nariyal / Gola)", hindi: "सूखा नारियल / गोला", defaultUnit: "pcs", brands: ["Premia", "Loose / Local"] }
+          ]
+        }
+      ]
+    },
+    {
+      id: "beverages_dairy",
+      name: "Beverages & Dairy",
+      hindi: "चाय, कॉफी और डेयरी",
+      description: "Tea leaves default to kg/g, Milk and Chaas default to L/ml.",
+      subcategories: [
+        {
+          id: "tea_coffee",
+          name: "Tea, Coffee & Drinks (चाय, कॉफी और पेय)",
+          items: [
+            { id: "tea_leaves", name: "Tea Leaves (Chai Patti)", hindi: "चाय पत्ती", defaultUnit: "kg", brands: ["Tata Tea Gold", "Tata Tea Premium", "Red Label", "Taj Mahal", "Wagh Bakri"] },
+            { id: "coffee", name: "Instant Coffee", hindi: "कॉफी", defaultUnit: "g", brands: ["Nescafe", "Bru", "Continental", "Tata Coffee"] },
+            { id: "energy_drink", name: "Energy Drink (Sugar-Free / Reg)", hindi: "एनर्जी ड्रिंक", defaultUnit: "pcs", brands: ["Red Bull", "Monster", "Sting"] }
+          ]
+        },
+        {
+          id: "milk_dairy",
+          name: "Milk, Butter & Dairy (दूध, मक्खन और दही)",
+          items: [
+            { id: "full_cream_milk", name: "Full Cream Milk", hindi: "फुल क्रीम दूध", defaultUnit: "L", brands: ["Mother Dairy", "Amul", "Ananda", "Paras", "Local Dairy"] },
+            { id: "toned_milk", name: "Toned / Double Toned Milk", hindi: "टोंड दूध", defaultUnit: "L", brands: ["Mother Dairy", "Amul", "Ananda", "Paras"] },
+            { id: "butter", name: "Salted Table Butter", hindi: "मक्खन", defaultUnit: "g", brands: ["Amul", "Mother Dairy", "Britannia", "Nutralite"] },
+            { id: "curd_chaas", name: "Curd / Chaas (Buttermilk)", hindi: "दही / छाछ", defaultUnit: "L", brands: ["Mother Dairy", "Amul", "Ananda", "Nestle"] },
+            { id: "ice_cream_sf", name: "Ice Cream (Sugar-Free / Regular)", hindi: "आइसक्रीम", defaultUnit: "pkt", brands: ["Amul", "Mother Dairy", "Kwality Walls", "Vadilal"] }
+          ]
+        }
+      ]
+    },
+    {
+      id: "snacks_packaged",
+      name: "Snacks, Biscuits & Packaged Foods",
+      hindi: "स्नैक्स, बिस्किट और पैकेट फूड",
+      description: "Noodles, pasta, biscuits, namkeen, pickles, and sauces.",
+      subcategories: [
+        {
+          id: "noodles_pasta",
+          name: "Noodles, Pasta & Vermicelli (नूडल्स, मैकरोनी और सेवईं)",
+          items: [
+            { id: "maggi_masala", name: "Masala Instant Noodles", hindi: "मसाला नूडल्स", defaultUnit: "pkt", brands: ["Maggi", "YiPPee!", "Top Ramen", "Ching's"] },
+            { id: "maggi_atta", name: "Veg Atta Noodles", hindi: "आटा नूडल्स", defaultUnit: "pkt", brands: ["Maggi", "YiPPee!", "Patanjali"] },
+            { id: "vermicelli", name: "Roasted Vermicelli (Sevai)", hindi: "भुनी सेवईं", defaultUnit: "g", brands: ["Bambino", "MTR", "Haldiram's", "Patanjali"] },
+            { id: "macaroni", name: "Macaroni / Pasta", hindi: "मैकरोनी / पास्ता", defaultUnit: "g", brands: ["Homechef", "Bambino", "Disano", "Sunfeast"] },
+            { id: "soya_chunks", name: "Soya Chunks / Granules", hindi: "सोया चंक्स / न्यूट्रेला", defaultUnit: "g", brands: ["Nutrela (Ruchi)", "Fortune", "Saffola"] }
+          ]
+        },
+        {
+          id: "biscuits_cookies",
+          name: "Biscuits & Cookies (बिस्किट और कुकीज़)",
+          items: [
+            { id: "marie_biscuit", name: "Marie Biscuits", hindi: "मैरी बिस्किट", defaultUnit: "pkt", brands: ["Britannia Marie Gold", "Sunfeast Marie Light", "Parle"] },
+            { id: "nice_biscuit", name: "Coconut / Nice Time Biscuits", hindi: "नाइस टाइम बिस्किट", defaultUnit: "pkt", brands: ["Britannia Nice Time", "Parle", "Sunfeast"] },
+            { id: "oreo_cream", name: "Chocolate Cream Biscuits", hindi: "ओरियो / क्रीम बिस्किट", defaultUnit: "pkt", brands: ["Cadbury Oreo", "Sunfeast Dark Fantasy", "Britannia Bourbon"] },
+            { id: "biscoff", name: "Caramelized Biscuits / Cookies", hindi: "बिस्कॉफ कुकीज़", defaultUnit: "pkt", brands: ["Lotus Biscoff", "Unibic", "Britannia Good Day"] }
+          ]
+        },
+        {
+          id: "namkeen_sauces",
+          name: "Namkeen, Pickles & Sauces (नमकीन, अचार और सॉस)",
+          items: [
+            { id: "bhujia", name: "Aloo / Plain Bhujia", hindi: "भुजिया नमकीन", defaultUnit: "g", brands: ["Haldiram's", "Bikaji", "Bikanervala", "Brij Namkeen"] },
+            { id: "moong_dal_namkeen", name: "Moong Dal / Mixture Namkeen", hindi: "मूंग दाल / मिक्सचर नमकीन", defaultUnit: "g", brands: ["Haldiram's", "Tops Gold", "Benaji", "Bikaji"] },
+            { id: "punjabi_tadka", name: "Punjabi Tadka / Spicy Namkeen", hindi: "पंजाबी तड़का नमकीन", defaultUnit: "g", brands: ["Haldiram's", "Homechef", "Bikaji"] },
+            { id: "roasted_chana", name: "Roasted Chana (Bhuna Chana)", hindi: "भुना चना", defaultUnit: "g", brands: ["Premia", "Haldiram's", "Loose / Local"] },
+            { id: "murmura", name: "Murmura (Puffed Rice)", hindi: "मुरमुरा / लाई", defaultUnit: "g", brands: ["Premia", "Haldiram's", "Loose / Local"] },
+            { id: "popcorn", name: "Popcorn Kernels / Instant Pack", hindi: "मक्का पॉपकॉर्न", defaultUnit: "pkt", brands: ["Act II", "Premia", "4700BC"] },
+            { id: "nachos_chips", name: "Nachos / Potato Chips", hindi: "नाचो चिप्स", defaultUnit: "pkt", brands: ["Doritos", "Lay's", "Bingo!", "Cornitos"] },
+            { id: "mango_pickle", name: "Mango Pickle (Aam ka Achar)", hindi: "आम का अचार", defaultUnit: "g", brands: ["Martban", "Mother's Recipe", "Tops", "Pachranga", "Nilon's"] },
+            { id: "tomato_sauce", name: "Hot & Sweet Tomato Sauce", hindi: "मीठी-तीखी टोमैटो सॉस", defaultUnit: "g", brands: ["Maggi", "Kissan", "Tops", "Heinz"] }
+          ]
+        }
+      ]
+    },
+    {
+      id: "personal_care",
+      name: "Personal Care & OTC",
+      hindi: "पर्सनल केयर और प्राथमिक उपचार",
+      description: "Bathing soaps, oral care, face wash, hair color, digestives, and first aid.",
+      subcategories: [
+        {
+          id: "bath_oral_skin",
+          name: "Bath, Oral & Skin Care (साबुन, टूथपेस्ट और फेस वॉश)",
+          items: [
+            { id: "bathing_soap", name: "Bathing Soap", hindi: "नहाने का साबुन", defaultUnit: "pcs", brands: ["Dove", "Pears", "Dettol", "Liril", "Godrej No.1", "Lux"] },
+            { id: "handwash", name: "Liquid Handwash / Germ Soap", hindi: "हैंडवाश / प्रोटेक्ट साबुन", defaultUnit: "pkt", brands: ["Dettol", "Godrej Protekt", "Lifebuoy", "Savlon"] },
+            { id: "toothpaste", name: "Toothpaste", hindi: "टूथपेस्ट", defaultUnit: "g", brands: ["Colgate MaxFresh", "Colgate Strong Teeth", "Sensodyne", "Pepsodent", "Dabur Red"] },
+            { id: "toothbrush", name: "Toothbrush", hindi: "टूथब्रश", defaultUnit: "pcs", brands: ["Oral-B", "Colgate", "Sensodyne"] },
+            { id: "face_wash", name: "Face Wash / Cleanser", hindi: "फेस वॉश / क्लींजर", defaultUnit: "pcs", brands: ["Clean & Clear", "Garnier Men", "Himalaya", "Pond's", "Nivea"] },
+            { id: "hair_color", name: "Hair Color / Dye", hindi: "बालों का रंग / हेयर डाई", defaultUnit: "pkt", brands: ["Garnier", "L'Oreal", "Godrej Expert", "Indica"] },
+            { id: "hygiene_wipes", name: "Hygiene / Wet Wipes", hindi: "हाइजीन वाइप्स", defaultUnit: "pkt", brands: ["Fresh Ones", "Kara", "Himalaya", "Origami"] }
+          ]
+        },
+        {
+          id: "otc_wellness",
+          name: "Digestives, OTC & Utility (हाजमोला, इनो और प्राथमिक उपचार)",
+          items: [
+            { id: "hajmola", name: "Hajmola Digestive Tablets", hindi: "हाजमोला / पाचक गोली", defaultUnit: "pcs", brands: ["Dabur Hajmola"] },
+            { id: "eno", name: "Eno / Jeera Digestive Powder", hindi: "इनो / जीरा पाचक चूर्ण", defaultUnit: "pkt", brands: ["Eno", "Dabur", "Patanjali"] },
+            { id: "saunf_mouthfreshener", name: "Saunf / Mouth Freshener", hindi: "सौंफ / माउथ फ्रेशनर", defaultUnit: "g", brands: ["Vecco", "Pass Pass", "Catch", "Loose / Local"] },
+            { id: "bandaid", name: "Washproof Band-Aid Strips", hindi: "पट्टी / बैंड-एड", defaultUnit: "pkt", brands: ["Hansaplast", "Band-Aid (Johnson's)", "Dettol"] },
+            { id: "mosquito_net", name: "Mosquito Net / Cover", hindi: "मच्छरदानी / नेट कवर", defaultUnit: "pcs", brands: ["SL Net", "Classic Mosquito Net", "Local"] }
+          ]
+        }
+      ]
+    },
+    {
+      id: "household_cleaning",
+      name: "Household & Cleaning",
+      hindi: "घर और सफाई",
+      description: "Cleaners, dishwashing supplies, kitchen foil, air fresheners, and brushes.",
+      subcategories: [
+        {
+          id: "surface_cleaners",
+          name: "Floor, Toilet & Glass Cleaners (फर्श, टॉयलेट और कांच क्लीनर)",
+          items: [
+            { id: "floor_cleaner", name: "Disinfectant Floor Cleaner", hindi: "फ्लोर क्लीनर / फर्श साफ करने का घोल", defaultUnit: "L", brands: ["Lizol", "Domex", "Nimyle", "Dettol"] },
+            { id: "toilet_cleaner", name: "Toilet Cleaner Liquid", hindi: "टॉयलेट क्लीनर", defaultUnit: "L", brands: ["Harpic", "Domex", "Sanifresh"] },
+            { id: "toilet_block", name: "Toilet Tank / Rim Cleaner Block", hindi: "टॉयलेट टैंक क्लीनर ब्लॉक", defaultUnit: "pcs", brands: ["Harpic", "Odonil", "PL"] },
+            { id: "glass_cleaner", name: "Glass & Surface Spray Cleaner", hindi: "कांच साफ करने का स्प्रे", defaultUnit: "pcs", brands: ["Colin", "Mr. Muscle"] },
+            { id: "antiseptic_liquid", name: "Antiseptic Liquid", hindi: "एंटीसेप्टिक लिक्विड", defaultUnit: "ml", brands: ["Dettol", "Savlon"] },
+            { id: "air_freshener", name: "Room / Bathroom Air Freshener", hindi: "एयर फ्रेशनर", defaultUnit: "pcs", brands: ["Godrej Aer", "Odonil", "Ambi Pur"] }
+          ]
+        },
+        {
+          id: "kitchen_utensil_care",
+          name: "Kitchen, Utensil & Bath Accessories (बर्तन सफाई और रसोई सामान)",
+          items: [
+            { id: "dishwash", name: "Dishwash Gel / Bar Multipack", hindi: "बर्तन धोने का साबुन / जेल", defaultUnit: "pcs", brands: ["Vim", "Pril", "Exo", "Giffy"] },
+            { id: "pitambari", name: "Pitambari Shining Powder", hindi: "पीतांबरी / बर्तन चमकाने का पाउडर", defaultUnit: "g", brands: ["Pitambari"] },
+            { id: "aluminium_foil", name: "Aluminium Foil Roll", hindi: "एल्युमिनियम फॉयल", defaultUnit: "pcs", brands: ["Hindalco Freshwrapp", "Oddy", "Origami"] },
+            { id: "baking_soda", name: "Cooking / Cleaning Baking Soda", hindi: "बेकिंग सोडा", defaultUnit: "g", brands: ["Weikfield", "Neirfield", "Blue Bird"] },
+            { id: "washing_brush", name: "Washing / Scrubbing Brush", hindi: "कपड़े / बर्तन धोने का ब्रश", defaultUnit: "pcs", brands: ["Scotch-Brite", "Gala", "PL"] },
+            { id: "bath_loofah", name: "Bath Mesh / Loofah", hindi: "नहाने का लूफा / जाली", defaultUnit: "pcs", brands: ["Vega", "Bronson", "Local"] },
+            { id: "soap_dispenser", name: "Liquid Soap Dispenser", hindi: "साबुन डिस्पेंसर", defaultUnit: "pcs", brands: ["PL", "Cello", "Milton", "Local"] }
+          ]
+        }
+      ]
+    }
+  ];
+
+  // Quick preset chips based on default unit
+  const UNIT_PRESETS = {
+    kg: [
+      { label: "250g", qty: "250", unit: "g" },
+      { label: "500g", qty: "500", unit: "g" },
+      { label: "1 kg", qty: "1", unit: "kg" },
+      { label: "2 kg", qty: "2", unit: "kg" },
+      { label: "5 kg", qty: "5", unit: "kg" }
+    ],
+    g: [
+      { label: "50g", qty: "50", unit: "g" },
+      { label: "100g", qty: "100", unit: "g" },
+      { label: "250g", qty: "250", unit: "g" },
+      { label: "500g", qty: "500", unit: "g" },
+      { label: "1 kg", qty: "1", unit: "kg" }
+    ],
+    L: [
+      { label: "500ml", qty: "500", unit: "ml" },
+      { label: "1 L", qty: "1", unit: "L" },
+      { label: "2 L", qty: "2", unit: "L" },
+      { label: "5 L", qty: "5", unit: "L" }
+    ],
+    ml: [
+      { label: "100ml", qty: "100", unit: "ml" },
+      { label: "250ml", qty: "250", unit: "ml" },
+      { label: "500ml", qty: "500", unit: "ml" },
+      { label: "1 L", qty: "1", unit: "L" }
+    ],
+    pkt: [
+      { label: "1 pkt", qty: "1", unit: "pkt" },
+      { label: "2 pkt", qty: "2", unit: "pkt" },
+      { label: "4 pkt", qty: "4", unit: "pkt" },
+      { label: "6 pkt", qty: "6", unit: "pkt" }
+    ],
+    pcs: [
+      { label: "1 no", qty: "1", unit: "pcs" },
+      { label: "2 no", qty: "2", unit: "pcs" },
+      { label: "4 no", qty: "4", unit: "pcs" },
+      { label: "6 no", qty: "6", unit: "pcs" }
+    ]
+  };
+
+  const ALL_UNITS = [
+    { value: "kg", label: "kg" },
+    { value: "g", label: "g (grams)" },
+    { value: "L", label: "L (Liter)" },
+    { value: "ml", label: "ml" },
+    { value: "pkt", label: "pkt" },
+    { value: "pcs", label: "no / pcs" }
+  ];
+
+  // =========================================================================
+  // 2. APPLICATION STATE & STORAGE
+  // =========================================================================
+  const STORAGE_KEY = "indian_grocery_wizard_v1";
+
+  let state = {
+    stepIndex: 0, // 0..GROCERY_CATALOG.length-1 are categories; GROCERY_CATALOG.length is Review
+    searchQuery: "",
+    selections: {}, // itemId -> { brandMode: 'preset'|'other', brand: string, customBrand: string, rawQty: string, numericQty: number, unit: string }
+    customItems: [] // array of { id, categoryId, subcategoryId, name, hindi, defaultUnit, brands }
+  };
+
+  function loadState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === "object") {
+          state.selections = parsed.selections || {};
+          state.customItems = Array.isArray(parsed.customItems) ? parsed.customItems : [];
+          if (typeof parsed.stepIndex === "number" && parsed.stepIndex >= 0 && parsed.stepIndex <= GROCERY_CATALOG.length) {
+            state.stepIndex = parsed.stepIndex;
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore storage errors in restricted iframes
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        stepIndex: state.stepIndex,
+        selections: state.selections,
+        customItems: state.customItems
+      }));
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }
+
+  // =========================================================================
+  // 3. SMART QUANTITY & UNIT PARSER (Handles "1.5KG", "500gm", "2.5 L", etc.)
+  // =========================================================================
+  function normalizeUnitToken(token) {
+    if (!token) return null;
+    const t = token.trim().toLowerCase();
+    if (t === "kg" || t === "kgs" || t === "kilo" || t === "kilogram" || t === "kilograms") return "kg";
+    if (t === "g" || t === "gm" || t === "gms" || t === "gram" || t === "grams") return "g";
+    if (t === "l" || t === "lt" || t === "ltr" || t === "ltrs" || t === "liter" || t === "liters" || t === "litre" || t === "litres") return "L";
+    if (t === "ml" || t === "mls" || t === "milliliter" || t === "millilitre") return "ml";
+    if (t === "pkt" || t === "pkts" || t === "pack" || t === "packs" || t === "packet" || t === "packets") return "pkt";
+    if (t === "no" || t === "nos" || t === "pc" || t === "pcs" || t === "piece" || t === "pieces" || t === "unit") return "pcs";
+    return null;
+  }
+
+  function parseQuantityInput(rawStr, currentUnit) {
+    const trimmed = String(rawStr || "").trim();
+    if (!trimmed) {
+      return { rawQty: "", numericQty: 0, unit: currentUnit, detectedUnit: false };
+    }
+
+    // Match leading number (integer or decimal like 1.5 or .5) followed by optional spaces and unit text
+    const match = trimmed.match(/^([0-9]*\.?[0-9]+)\s*([a-zA-Z]*)$/);
+    if (match) {
+      const num = parseFloat(match[1]);
+      const unitStr = match[2];
+      const mappedUnit = normalizeUnitToken(unitStr);
+      if (!isNaN(num) && num > 0) {
+        return {
+          rawQty: trimmed,
+          numericQty: num,
+          unit: mappedUnit || currentUnit,
+          detectedUnit: Boolean(mappedUnit)
+        };
+      }
+    }
+
+    return {
+      rawQty: trimmed,
+      numericQty: 0,
+      unit: currentUnit,
+      detectedUnit: false
+    };
+  }
+
+  function formatDisplayQty(sel) {
+    if (!sel || !(sel.numericQty > 0)) return "";
+    const unitLabel = sel.unit === "pcs" ? "no" : sel.unit;
+    return `${sel.numericQty} ${unitLabel}`;
+  }
+
+  // =========================================================================
+  // 4. HELPER ACCESSORS
+  // =========================================================================
+  function getCategoryWithCustomItems(cat) {
+    const clonedSubcats = cat.subcategories.map(sub => ({
+      ...sub,
+      items: [...sub.items]
+    }));
+
+    const extras = state.customItems.filter(ci => ci.categoryId === cat.id);
+    if (extras.length > 0) {
+      // Place into matching subcategory or first subcategory
+      extras.forEach(extra => {
+        const target = clonedSubcats.find(s => s.id === extra.subcategoryId) || clonedSubcats[0];
+        target.items.push(extra);
+      });
+    }
+    return clonedSubcats;
+  }
+
+  function getItemSelection(item) {
+    if (!state.selections[item.id]) {
+      state.selections[item.id] = {
+        brandMode: "preset",
+        brand: item.brands[0] || "Loose / Local",
+        customBrand: "",
+        rawQty: "",
+        numericQty: 0,
+        unit: item.defaultUnit || "kg"
+      };
+    }
+    return state.selections[item.id];
+  }
+
+  function getEffectiveBrand(sel) {
+    if (sel.brandMode === "other") {
+      const custom = (sel.customBrand || "").trim();
+      return custom ? custom : "Other (Unspecified)";
+    }
+    return sel.brand || "Any Brand";
+  }
+
+  function isItemSelected(itemId) {
+    const sel = state.selections[itemId];
+    return Boolean(sel && sel.numericQty > 0);
+  }
+
+  function getSelectedCountForCategory(cat) {
+    const subcats = getCategoryWithCustomItems(cat);
+    let count = 0;
+    subcats.forEach(sub => {
+      sub.items.forEach(item => {
+        if (isItemSelected(item.id)) count++;
+      });
+    });
+    return count;
+  }
+
+  function getTotalSelectedCount() {
+    let total = 0;
+    GROCERY_CATALOG.forEach(cat => {
+      total += getSelectedCountForCategory(cat);
+    });
+    return total;
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById("toastBox");
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 2400);
+  }
+
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  // =========================================================================
+  // 5. RENDERING: STEPPER & HEADER COUNTERS
+  // =========================================================================
+  function updateCounters() {
+    const total = getTotalSelectedCount();
+    document.getElementById("topSelectedCount").textContent = total;
+    document.getElementById("footerSelectedCount").textContent = total;
+  }
+
+  function renderStepper() {
+    const track = document.getElementById("stepperTrack");
+    let html = "";
+
+    GROCERY_CATALOG.forEach((cat, idx) => {
+      const count = getSelectedCountForCategory(cat);
+      const isActive = state.stepIndex === idx;
+      const cls = `step-pill ${isActive ? "active" : ""} ${count > 0 ? "has-items" : ""}`;
+      html += `
+        <button type="button" class="${cls}" data-step="${idx}">
+          <span class="step-num">${idx + 1}</span>
+          <span>${escapeHtml(cat.name)}</span>
+          ${count > 0 ? `<span class="step-count">${count}</span>` : ""}
+        </button>
+      `;
+    });
+
+    // Final Review Step Pill
+    const totalCount = getTotalSelectedCount();
+    const isReviewActive = state.stepIndex === GROCERY_CATALOG.length;
+    html += `
+      <button type="button" class="step-pill ${isReviewActive ? "active" : ""} ${totalCount > 0 ? "has-items" : ""}" data-step="${GROCERY_CATALOG.length}">
+        <span class="step-num">&#10003;</span>
+        <span>Review &amp; Export</span>
+        <span class="step-count">${totalCount}</span>
+      </button>
+    `;
+
+    track.innerHTML = html;
+
+    // Scroll active pill into view
+    const activeEl = track.querySelector(".step-pill.active");
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }
+
+  function renderFooter() {
+    const footer = document.getElementById("wizardFooter");
+    const isReview = state.stepIndex === GROCERY_CATALOG.length;
+
+    if (isReview) {
+      footer.style.display = "none";
+      return;
+    }
+
+    footer.style.display = "block";
+    const btnPrev = document.getElementById("btnPrevStep");
+    const btnNext = document.getElementById("btnNextStep");
+    const progress = document.getElementById("footerProgressText");
+
+    btnPrev.disabled = state.stepIndex === 0;
+    btnPrev.style.opacity = state.stepIndex === 0 ? "0.45" : "1";
+    btnPrev.style.cursor = state.stepIndex === 0 ? "not-allowed" : "pointer";
+
+    progress.textContent = `Category ${state.stepIndex + 1} of ${GROCERY_CATALOG.length}`;
+
+    if (state.stepIndex === GROCERY_CATALOG.length - 1) {
+      btnNext.innerHTML = `Review &amp; Export List <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
+    } else {
+      btnNext.innerHTML = `Next Category <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
+    }
+  }
+
+  // =========================================================================
+  // 6. RENDERING: CATEGORY & SUBCATEGORY ITEMS WIZARD STEP
+  // =========================================================================
+  function renderCategoryStep(stepIdx) {
+    const cat = GROCERY_CATALOG[stepIdx];
+    const subcats = getCategoryWithCustomItems(cat);
+    const query = (state.searchQuery || "").trim().toLowerCase();
+
+    let subcatsHtml = "";
+    let totalVisibleItems = 0;
+
+    subcats.forEach(sub => {
+      const filteredItems = query
+        ? sub.items.filter(item =>
+            item.name.toLowerCase().includes(query) ||
+            (item.hindi && item.hindi.toLowerCase().includes(query)) ||
+            item.brands.some(b => b.toLowerCase().includes(query))
+          )
+        : sub.items;
+
+      if (filteredItems.length === 0) return;
+      totalVisibleItems += filteredItems.length;
+
+      const selectedInSub = filteredItems.filter(it => isItemSelected(it.id)).length;
+
+      let cardsHtml = "";
+      filteredItems.forEach(item => {
+        const sel = getItemSelection(item);
+        const active = sel.numericQty > 0;
+        const presets = UNIT_PRESETS[item.defaultUnit] || UNIT_PRESETS.kg;
+
+        const brandOptionsHtml = item.brands
+          .map(b => `<option value="${escapeHtml(b)}" ${sel.brandMode === "preset" && sel.brand === b ? "selected" : ""}>${escapeHtml(b)}</option>`)
+          .join("") +
+          `<option value="__OTHER__" ${sel.brandMode === "other" ? "selected" : ""}>Other (Type Brand Name)...</option>`;
+
+        const unitOptionsHtml = ALL_UNITS
+          .map(u => `<option value="${u.value}" ${sel.unit === u.value ? "selected" : ""}>${escapeHtml(u.label)}</option>`)
+          .join("");
+
+        const chipsHtml = presets
+          .map(p => {
+            const isChipActive = active && String(sel.numericQty) === p.qty && sel.unit === p.unit;
+            return `<button type="button" class="chip-btn ${isChipActive ? "active-chip" : ""}" data-action="preset" data-item-id="${item.id}" data-qty="${p.qty}" data-unit="${p.unit}">${escapeHtml(p.label)}</button>`;
+          })
+          .join("");
+
+        cardsHtml += `
+          <article class="item-card ${active ? "selected" : ""}" data-card-id="${item.id}">
+            <div class="item-top">
+              <div>
+                <div class="item-name">${escapeHtml(item.name)}</div>
+                <div class="item-hindi">(${escapeHtml(item.hindi)})</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;" data-badge-slot="${item.id}">
+                ${active
+                  ? `<span class="item-status-badge">&#10003; ${escapeHtml(formatDisplayQty(sel))}</span>
+                     <button type="button" class="btn-clear-item" data-action="clear-item" data-item-id="${item.id}" title="Remove item">Clear</button>`
+                  : ""}
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label class="field-label" for="brand_${item.id}">Select Brand</label>
+              <div class="brand-controls">
+                <select id="brand_${item.id}" class="control-select" data-action="brand-select" data-item-id="${item.id}">
+                  ${brandOptionsHtml}
+                </select>
+                <input
+                  type="text"
+                  id="custom_brand_${item.id}"
+                  class="control-input custom-brand-input"
+                  data-action="custom-brand-input"
+                  data-item-id="${item.id}"
+                  placeholder="Type custom / local brand name..."
+                  value="${escapeHtml(sel.customBrand)}"
+                  style="display:${sel.brandMode === "other" ? "block" : "none"};"
+                />
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label class="field-label" for="qty_${item.id}">Quantity (e.g. 1.5KG, 500g, 2)</label>
+              <div class="qty-input-group">
+                <input
+                  type="text"
+                  id="qty_${item.id}"
+                  class="control-input qty-text"
+                  data-action="qty-input"
+                  data-item-id="${item.id}"
+                  placeholder="Enter qty (e.g. 1.5${item.defaultUnit})"
+                  value="${escapeHtml(sel.rawQty)}"
+                  autocomplete="off"
+                />
+                <select id="unit_${item.id}" class="control-select unit-select" data-action="unit-select" data-item-id="${item.id}" aria-label="Unit">
+                  ${unitOptionsHtml}
+                </select>
+              </div>
+              <div class="preset-chips">${chipsHtml}</div>
+            </div>
+          </article>
+        `;
+      });
+
+      subcatsHtml += `
+        <section class="subcat-section">
+          <div class="subcat-header">
+            <h3>${escapeHtml(sub.name)}</h3>
+            <span class="subcat-meta">${selectedInSub} / ${filteredItems.length} selected</span>
+          </div>
+          <div class="items-grid">
+            ${cardsHtml}
+          </div>
+        </section>
+      `;
+    });
+
+    if (totalVisibleItems === 0) {
+      subcatsHtml = `
+        <div class="summary-card empty-state" style="padding:32px 20px;margin-bottom:16px;">
+          <h3>No matching items in "${escapeHtml(cat.name)}"</h3>
+          <p>No items matched "<strong>${escapeHtml(state.searchQuery)}</strong>".</p>
+          <button type="button" class="btn btn-secondary" id="btnClearSearch">Clear Filter</button>
+        </div>
+      `;
+    }
+
+    const subcatOptionsHtml = cat.subcategories
+      .map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`)
+      .join("");
+
+    const customUnitOptionsHtml = ALL_UNITS
+      .map(u => `<option value="${u.value}">${escapeHtml(u.label)}</option>`)
+      .join("");
+
+    const html = `
+      <div class="cat-header">
+        <div class="cat-title-group">
+          <div>
+            <span class="cat-badge">Step ${stepIdx + 1} of ${GROCERY_CATALOG.length}</span>
+            <h2>${escapeHtml(cat.name)} <span style="color:var(--primary);font-weight:600;">(${escapeHtml(cat.hindi)})</span></h2>
+            <p>${escapeHtml(cat.description)}</p>
+          </div>
+        </div>
+        <div class="cat-tools">
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="catSearchInput" placeholder="Filter items in category..." value="${escapeHtml(state.searchQuery)}" />
+          </div>
+        </div>
+      </div>
+
+      ${subcatsHtml}
+
+      <div class="custom-item-panel">
+        <h4>+ Add Missing Item to ${escapeHtml(cat.name)}</h4>
+        <div class="custom-item-form">
+          <div>
+            <label class="field-label" for="newItemName">Item Name (English)</label>
+            <input type="text" id="newItemName" class="control-input" placeholder="e.g. Organic Brown Sugar" />
+          </div>
+          <div>
+            <label class="field-label" for="newItemHindi">Hindi Name (Optional)</label>
+            <input type="text" id="newItemHindi" class="control-input" placeholder="e.g. ब्राउन शुगर" />
+          </div>
+          <div>
+            <label class="field-label" for="newItemSubcat">Subcategory</label>
+            <select id="newItemSubcat" class="control-select">${subcatOptionsHtml}</select>
+          </div>
+          <div>
+            <label class="field-label" for="newItemUnit">Default Unit</label>
+            <select id="newItemUnit" class="control-select">${customUnitOptionsHtml}</select>
+          </div>
+          <button type="button" class="btn btn-primary" id="btnAddCustomItem">+ Add Item</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("mainContainer").innerHTML = html;
+  }
+
+  // =========================================================================
+  // 7. RENDERING: FINAL REVIEW & EXPORT SUMMARY
+  // =========================================================================
+  function renderSummaryStep() {
+    const totalItems = getTotalSelectedCount();
+    const todayStr = new Date().toLocaleDateString("en-IN", {
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+
+    if (totalItems === 0) {
+      document.getElementById("mainContainer").innerHTML = `
+        <div class="summary-card empty-state">
+          <h3>Your Grocery List is Empty</h3>
+          <p>Go through the categories and enter quantities for the items you need. Only items with a quantity will appear here.</p>
+          <button type="button" class="btn btn-primary" id="btnBackToStart">Start Selecting Items</button>
+        </div>
+      `;
+      return;
+    }
+
+    let sectionsHtml = "";
+    let serialNo = 1;
+
+    GROCERY_CATALOG.forEach(cat => {
+      const subcats = getCategoryWithCustomItems(cat);
+      const selectedEntries = [];
+
+      subcats.forEach(sub => {
+        sub.items.forEach(item => {
+          if (isItemSelected(item.id)) {
+            selectedEntries.push({
+              item,
+              subcatName: sub.name,
+              sel: state.selections[item.id]
+            });
+          }
+        });
+      });
+
+      if (selectedEntries.length === 0) return;
+
+      sectionsHtml += `
+        <div class="summary-cat-block">
+          <div class="summary-cat-title">${escapeHtml(cat.name)} (${escapeHtml(cat.hindi)}) &mdash; ${selectedEntries.length} item${selectedEntries.length > 1 ? "s" : ""}</div>
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th class="check-box-cell">Done</th>
+                <th style="width: 48px;">#</th>
+                <th>Item Name (हिंदी नाम)</th>
+                <th>Brand</th>
+                <th style="width: 130px;">Quantity</th>
+                <th style="width: 70px; text-align:right;">Edit</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      selectedEntries.forEach(entry => {
+        const brandLabel = getEffectiveBrand(entry.sel);
+        const qtyLabel = formatDisplayQty(entry.sel);
+        const catIdx = GROCERY_CATALOG.findIndex(c => c.id === cat.id);
+
+        sectionsHtml += `
+          <tr>
+            <td class="check-box-cell"><span class="print-checkbox" aria-hidden="true"></span></td>
+            <td>${serialNo++}</td>
+            <td><strong>${escapeHtml(entry.item.name)}</strong> <span style="color:#374151;">(${escapeHtml(entry.item.hindi)})</span></td>
+            <td>${escapeHtml(brandLabel)}</td>
+            <td><span class="qty-pill-summary">${escapeHtml(qtyLabel)}</span></td>
+            <td style="text-align:right;">
+              <button type="button" class="btn-clear-item" data-action="jump-edit" data-step="${catIdx}" data-item-id="${entry.item.id}">Edit</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      sectionsHtml += `
+            </tbody>
+          </table>
+        </div>
+      `;
+    });
+
+    const html = `
+      <div class="summary-card">
+        <div class="summary-topbar">
+          <div class="summary-title">
+            <h2>Indian Grocery Shopping List (राशन सूची)</h2>
+            <div class="summary-meta">
+              <span><strong>Date:</strong> ${escapeHtml(todayStr)}</span>
+              <span><strong>Total Selected Items:</strong> ${totalItems}</span>
+            </div>
+          </div>
+          <div class="summary-actions">
+            <button type="button" class="btn btn-secondary" id="btnContinueShopping">
+              &larr; Back to Categories
+            </button>
+            <button type="button" class="btn btn-secondary" id="btnCopyText">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              Copy List Text
+            </button>
+            <button type="button" class="btn btn-accent" id="btnExportCsv">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>
+              </svg>
+              Export as CSV
+            </button>
+            <button type="button" class="btn btn-primary" id="btnExportPdf">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Export as PDF
+            </button>
+          </div>
+        </div>
+        ${sectionsHtml}
+      </div>
+    `;
+
+    document.getElementById("mainContainer").innerHTML = html;
+  }
+
+  // =========================================================================
+  // 8. FULL RENDER ORCHESTRATOR
+  // =========================================================================
+  function renderApp() {
+    updateCounters();
+    renderStepper();
+    renderFooter();
+
+    if (state.stepIndex >= GROCERY_CATALOG.length) {
+      renderSummaryStep();
+    } else {
+      renderCategoryStep(state.stepIndex);
+    }
+    saveState();
+  }
+
+  // =========================================================================
+  // 9. IN-PLACE CARD SYNC (Smooth typing without losing input focus)
+  // =========================================================================
+  function syncCardVisualState(itemId) {
+    const card = document.querySelector(`[data-card-id="${itemId}"]`);
+    if (!card) return;
+
+    const sel = state.selections[itemId];
+    const active = Boolean(sel && sel.numericQty > 0);
+    card.classList.toggle("selected", active);
+
+    const badgeSlot = card.querySelector(`[data-badge-slot="${itemId}"]`);
+    if (badgeSlot) {
+      badgeSlot.innerHTML = active
+        ? `<span class="item-status-badge">&#10003; ${escapeHtml(formatDisplayQty(sel))}</span>
+           <button type="button" class="btn-clear-item" data-action="clear-item" data-item-id="${itemId}" title="Remove item">Clear</button>`
+        : "";
+    }
+
+    // Update preset chip active states
+    card.querySelectorAll(".chip-btn").forEach(chip => {
+      const match = active && String(sel.numericQty) === chip.dataset.qty && sel.unit === chip.dataset.unit;
+      chip.classList.toggle("active-chip", match);
+    });
+
+    updateCounters();
+    renderStepper();
+    saveState();
+  }
+
+  function findItemById(itemId) {
+    for (const cat of GROCERY_CATALOG) {
+      const subcats = getCategoryWithCustomItems(cat);
+      for (const sub of subcats) {
+        const found = sub.items.find(i => i.id === itemId);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+  // =========================================================================
+  // 10. COPY TO CLIPBOARD (Using execCommand fallback per iframe compatibility)
+  // =========================================================================
+  function copyGroceryListToClipboard() {
+    const lines = ["INDIAN GROCERY SHOPPING LIST (राशन सूची)", "========================================"];
+    let idx = 1;
+
+    GROCERY_CATALOG.forEach(cat => {
+      const subcats = getCategoryWithCustomItems(cat);
+      const catLines = [];
+
+      subcats.forEach(sub => {
+        sub.items.forEach(item => {
+          if (isItemSelected(item.id)) {
+            const sel = state.selections[item.id];
+            catLines.push(`${idx++}. ${item.name} (${item.hindi}) - ${getEffectiveBrand(sel)} : ${formatDisplayQty(sel)}`);
+          }
+        });
+      });
+
+      if (catLines.length > 0) {
+        lines.push(`\n[ ${cat.name} / ${cat.hindi} ]`);
+        lines.push(...catLines);
+      }
+    });
+
+    const text = lines.join("\n");
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () {
+        showToast("Grocery list copied to clipboard!");
+      }).catch(function () {
+        fallbackCopyText(text);
+      });
+    } else {
+      fallbackCopyText(text);
+    }
+  }
+
+  function fallbackCopyText(text) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand("copy");
+      showToast("Grocery list copied to clipboard!");
+    } catch (err) {
+      showToast("Unable to copy automatically.");
+    }
+    document.body.removeChild(textarea);
+  }
+
+  // =========================================================================
+  // 10B. PURE OFFLINE CLIENT-SIDE CSV & PDF 1.4 EXPORTERS
+  // =========================================================================
+  function getSelectedEntriesGrouped() {
+    const grouped = [];
+    GROCERY_CATALOG.forEach(cat => {
+      const subcats = getCategoryWithCustomItems(cat);
+      const entries = [];
+      subcats.forEach(sub => {
+        sub.items.forEach(item => {
+          if (isItemSelected(item.id)) {
+            const sel = state.selections[item.id];
+            entries.push({
+              categoryEn: cat.name,
+              categoryHi: cat.hindi,
+              subcategory: sub.name,
+              itemEn: item.name,
+              itemHi: item.hindi,
+              brand: getEffectiveBrand(sel),
+              numericQty: sel.numericQty,
+              unit: sel.unit === "pcs" ? "no" : sel.unit,
+              combinedQty: formatDisplayQty(sel)
+            });
+          }
+        });
+      });
+      if (entries.length > 0) {
+        grouped.push({
+          categoryEn: cat.name,
+          categoryHi: cat.hindi,
+          entries
+        });
+      }
+    });
+    return grouped;
+  }
+
+  function triggerBlobDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(function () {
+      URL.revokeObjectURL(url);
+    }, 2500);
+  }
+
+  function exportToCSV() {
+    const grouped = getSelectedEntriesGrouped();
+    if (grouped.length === 0) {
+      showToast("No items selected to export.");
+      return;
+    }
+
+    function csvCell(val) {
+      const str = String(val === null || val === undefined ? "" : val);
+      return '"' + str.replace(/"/g, '""') + '"';
+    }
+
+    const headers = [
+      "Category",
+      "Subcategory",
+      "Item (English)",
+      "Item (Hindi)",
+      "Brand",
+      "Quantity",
+      "Unit",
+      "Combined Qty"
+    ];
+
+    const rows = [headers.map(csvCell).join(",")];
+
+    grouped.forEach(group => {
+      group.entries.forEach(entry => {
+        // Strip Hindi parenthetical from subcategory label for clean English column
+        const cleanSubcat = entry.subcategory.replace(/\s*\([^)]*[\u0900-\u097F][^)]*\)\s*/g, "").trim();
+        rows.push([
+          entry.categoryEn,
+          cleanSubcat,
+          entry.itemEn,
+          entry.itemHi,
+          entry.brand,
+          entry.numericQty,
+          entry.unit,
+          entry.combinedQty
+        ].map(csvCell).join(","));
+      });
+    });
+
+    // Prefix with UTF-8 BOM (\uFEFF) so Microsoft Excel opens Devanagari Hindi cleanly
+    const csvContent = "\uFEFF" + rows.join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    triggerBlobDownload(blob, `grocery-list-${dateStamp}.csv`);
+    showToast(`Exported grocery-list-${dateStamp}.csv`);
+  }
+
+  // Transliterate Devanagari Hindi to readable Hinglish ASCII so standard PDF Type1 Helvetica renders cleanly
+  function transliterateDevanagariToAscii(input) {
+    const str = String(input || "");
+    const vowelsIndep = {
+      "अ": "a", "आ": "aa", "इ": "i", "ई": "ee", "उ": "u", "ऊ": "oo",
+      "ऋ": "ri", "ए": "e", "ऐ": "ai", "ओ": "o", "औ": "au", "ऑ": "o"
+    };
+    const matras = {
+      "ा": "aa", "ि": "i", "ी": "ee", "ु": "u", "ू": "oo",
+      "ृ": "ri", "े": "e", "ै": "ai", "ो": "o", "ौ": "au", "ॉ": "o"
+    };
+    const consonants = {
+      "क": "k", "ख": "kh", "ग": "g", "घ": "gh", "ङ": "ng",
+      "च": "ch", "छ": "chh", "ज": "j", "झ": "jh", "ञ": "ny",
+      "ट": "t", "ठ": "th", "ड": "d", "ढ": "dh", "ण": "n",
+      "त": "t", "थ": "th", "द": "d", "ध": "dh", "न": "n",
+      "प": "p", "फ": "ph", "ब": "b", "भ": "bh", "म": "m",
+      "य": "y", "र": "r", "ल": "l", "व": "v",
+      "श": "sh", "ष": "sh", "स": "s", "ह": "h",
+      "क़": "q", "ख़": "kh", "ग़": "gh", "ज़": "z", "ड़": "r", "ढ़": "rh", "फ़": "f"
+    };
+
+    let out = "";
+    for (let i = 0; i < str.length; i++) {
+      const ch = str[i];
+      const next = str[i + 1] || "";
+
+      // Check 2-char nukta consonant first
+      const pair = ch + next;
+      if (consonants[pair]) {
+        const after = str[i + 2] || "";
+        out += consonants[pair];
+        if (after === "्") {
+          i += 2;
+        } else if (matras[after]) {
+          out += matras[after];
+          i += 2;
+        } else {
+          if (after && (consonants[after] || vowelsIndep[after] || matras[after])) {
+            out += "a";
+          }
+          i += 1;
+        }
+        continue;
+      }
+
+      if (consonants[ch]) {
+        out += consonants[ch];
+        if (next === "्") {
+          i += 1;
+        } else if (matras[next]) {
+          out += matras[next];
+          i += 1;
+        } else {
+          // Inherent schwa 'a' when followed by another Devanagari letter (not word end / space / punctuation)
+          if (next && (consonants[next] || vowelsIndep[next])) {
+            out += "a";
+          }
+        }
+      } else if (vowelsIndep[ch]) {
+        out += vowelsIndep[ch];
+      } else if (matras[ch]) {
+        out += matras[ch];
+      } else if (ch === "ं" || ch === "ँ") {
+        out += "n";
+      } else if (ch === "ः") {
+        out += "h";
+      } else if (ch === "्") {
+        // Halant handled above
+      } else if (ch === "।") {
+        out += ".";
+      } else {
+        out += ch;
+      }
+    }
+
+    // Strip any remaining non-printable/non-ASCII symbols safely
+    return out
+      .replace(/[\u2013\u2014]/g, "-")
+      .replace(/[^\x20-\x7E]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function escapePdfLiteral(str) {
+    return String(str || "")
+      .replace(/\\/g, "\\\\")
+      .replace(/\(/g, "\\(")
+      .replace(/\)/g, "\\)");
+  }
+
+  function truncatePdfText(str, maxChars) {
+    const clean = String(str || "");
+    if (clean.length <= maxChars) return clean;
+    return clean.slice(0, Math.max(0, maxChars - 3)) + "...";
+  }
+
+  function exportToPDF() {
+    const grouped = getSelectedEntriesGrouped();
+    if (grouped.length === 0) {
+      showToast("No items selected to export.");
+      return;
+    }
+
+    const totalItems = grouped.reduce((acc, g) => acc + g.entries.length, 0);
+    const todayStr = new Date().toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+
+    // A4 dimensions in PDF points (72 dpi): 595.28 x 841.89
+    const PAGE_W = 595.28;
+    const PAGE_H = 841.89;
+    const MARGIN_L = 40;
+    const MARGIN_R = 40;
+    const CONTENT_W = PAGE_W - MARGIN_L - MARGIN_R;
+    const TOP_Y = PAGE_H - 44;
+    const BOTTOM_Y = 48;
+
+    const pagesStreams = [];
+    let ops = [];
+    let cursorY = TOP_Y;
+
+    function startNewPage(isFirstPage) {
+      if (!isFirstPage) {
+        pagesStreams.push(ops.join("\n"));
+        ops = [];
+      }
+      cursorY = TOP_Y;
+
+      if (isFirstPage) {
+        // Header banner bar
+        ops.push("0.106 0.369 0.125 rg");
+        ops.push(`${MARGIN_L} ${cursorY - 34} ${CONTENT_W} 40 re f`);
+
+        // Title in white
+        ops.push("1 1 1 rg");
+        ops.push("BT /F2 15 Tf");
+        ops.push(`${MARGIN_L + 12} ${cursorY - 17} Td (${escapePdfLiteral("Indian Grocery Shopping List (Ration Suchi)")}) Tj ET`);
+
+        ops.push("BT /F1 9 Tf");
+        ops.push(`${MARGIN_L + 12} ${cursorY - 29} Td (${escapePdfLiteral("Date: " + todayStr + "   |   Total Selected Items: " + totalItems)}) Tj ET`);
+
+        cursorY -= 50;
+      } else {
+        ops.push("0.35 0.38 0.36 rg");
+        ops.push("BT /F2 10 Tf");
+        ops.push(`${MARGIN_L} ${cursorY - 10} Td (${escapePdfLiteral("Indian Grocery Shopping List (Continued) - " + todayStr)}) Tj ET`);
+        ops.push("0.82 0.80 0.76 RG 0.8 w");
+        ops.push(`${MARGIN_L} ${cursorY - 16} m ${PAGE_W - MARGIN_R} ${cursorY - 16} l S`);
+        cursorY -= 28;
+      }
+
+      // Table column headers
+      ops.push("0.94 0.93 0.91 rg");
+      ops.push(`${MARGIN_L} ${cursorY - 16} ${CONTENT_W} 18 re f`);
+      ops.push("0.20 0.22 0.21 rg");
+      ops.push("BT /F2 8.5 Tf");
+      ops.push(`${MARGIN_L + 6} ${cursorY - 11} Td (${escapePdfLiteral("Done")}) Tj ET`);
+      ops.push("BT /F2 8.5 Tf");
+      ops.push(`${MARGIN_L + 36} ${cursorY - 11} Td (${escapePdfLiteral("#")}) Tj ET`);
+      ops.push("BT /F2 8.5 Tf");
+      ops.push(`${MARGIN_L + 58} ${cursorY - 11} Td (${escapePdfLiteral("Item Name (Hindi)")}) Tj ET`);
+      ops.push("BT /F2 8.5 Tf");
+      ops.push(`${MARGIN_L + 312} ${cursorY - 11} Td (${escapePdfLiteral("Brand")}) Tj ET`);
+      ops.push("BT /F2 8.5 Tf");
+      ops.push(`${MARGIN_L + 438} ${cursorY - 11} Td (${escapePdfLiteral("Qty & Unit")}) Tj ET`);
+
+      cursorY -= 22;
+    }
+
+    function ensureSpace(neededHeight) {
+      if (cursorY - neededHeight < BOTTOM_Y) {
+        startNewPage(false);
+      }
+    }
+
+    startNewPage(true);
+
+    let serialNo = 1;
+    grouped.forEach(group => {
+      // Need space for category bar (22pt) + at least 1 row (20pt)
+      ensureSpace(44);
+
+      const catHindiAscii = transliterateDevanagariToAscii(group.categoryHi);
+      const catHeaderLabel = catHindiAscii
+        ? `${group.categoryEn} (${catHindiAscii}) - ${group.entries.length} item${group.entries.length > 1 ? "s" : ""}`
+        : `${group.categoryEn} - ${group.entries.length} item${group.entries.length > 1 ? "s" : ""}`;
+
+      // Category subheader bar
+      ops.push("0.91 0.96 0.91 rg");
+      ops.push(`${MARGIN_L} ${cursorY - 15} ${CONTENT_W} 18 re f`);
+      ops.push("0.106 0.369 0.125 rg");
+      ops.push(`${MARGIN_L} ${cursorY - 15} 3 18 re f`);
+      ops.push("BT /F2 9.5 Tf");
+      ops.push(`${MARGIN_L + 9} ${cursorY - 10} Td (${escapePdfLiteral(truncatePdfText(catHeaderLabel, 82))}) Tj ET`);
+
+      cursorY -= 20;
+
+      group.entries.forEach(entry => {
+        ensureSpace(20);
+
+        const rowTop = cursorY;
+        const textY = rowTop - 11;
+
+        // Checkbox square [ ]
+        ops.push("0.30 0.33 0.31 RG 0.8 w");
+        ops.push(`${MARGIN_L + 10} ${rowTop - 12} 9 9 re S`);
+
+        // Serial number
+        ops.push("0.25 0.27 0.26 rg");
+        ops.push("BT /F1 9 Tf");
+        ops.push(`${MARGIN_L + 36} ${textY} Td (${escapePdfLiteral(String(serialNo++))}) Tj ET`);
+
+        // Item Name + Hindi transliteration
+        const hindiAscii = transliterateDevanagariToAscii(entry.itemHi);
+        const fullItemLabel = hindiAscii && hindiAscii.toLowerCase() !== entry.itemEn.toLowerCase()
+          ? `${entry.itemEn} (${hindiAscii})`
+          : entry.itemEn;
+        ops.push("0.10 0.12 0.11 rg");
+        ops.push("BT /F2 9 Tf");
+        ops.push(`${MARGIN_L + 58} ${textY} Td (${escapePdfLiteral(truncatePdfText(fullItemLabel, 46))}) Tj ET`);
+
+        // Brand
+        const safeBrand = transliterateDevanagariToAscii(entry.brand);
+        ops.push("0.22 0.24 0.23 rg");
+        ops.push("BT /F1 9 Tf");
+        ops.push(`${MARGIN_L + 312} ${textY} Td (${escapePdfLiteral(truncatePdfText(safeBrand, 22))}) Tj ET`);
+
+        // Combined Quantity & Unit
+        ops.push("0.106 0.369 0.125 rg");
+        ops.push("BT /F2 9.5 Tf");
+        ops.push(`${MARGIN_L + 438} ${textY} Td (${escapePdfLiteral(truncatePdfText(entry.combinedQty, 14))}) Tj ET`);
+
+        // Row bottom divider line
+        ops.push("0.88 0.87 0.84 RG 0.5 w");
+        ops.push(`${MARGIN_L} ${rowTop - 16} m ${PAGE_W - MARGIN_R} ${rowTop - 16} l S`);
+
+        cursorY -= 18;
+      });
+
+      cursorY -= 6;
+    });
+
+    pagesStreams.push(ops.join("\n"));
+
+    // Add page numbers to footer of each page
+    const totalPages = pagesStreams.length;
+    for (let p = 0; p < totalPages; p++) {
+      const footerOp = `\n0.45 0.47 0.46 rg\nBT /F1 8 Tf\n${MARGIN_L} 26 Td (${escapePdfLiteral("Generated by Indian Grocery Wizard  |  Page " + (p + 1) + " of " + totalPages)}) Tj ET`;
+      pagesStreams[p] += footerOp;
+    }
+
+    // Build valid PDF 1.4 binary object table
+    // Object 1: Catalog
+    // Object 2: Pages
+    // Object 3: Font Helvetica (/F1)
+    // Object 4: Font Helvetica-Bold (/F2)
+    // Object 5..4+N: Page objects
+    // Object 5+N..4+2N: Content Stream objects
+    const objects = [];
+    const pageObjNums = [];
+    const contentObjNums = [];
+
+    for (let i = 0; i < totalPages; i++) {
+      pageObjNums.push(5 + i);
+      contentObjNums.push(5 + totalPages + i);
+    }
+
+    objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+    objects[2] = `<< /Type /Pages /Kids [${pageObjNums.map(n => n + " 0 R").join(" ")}] /Count ${totalPages} >>`;
+    objects[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
+    objects[4] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
+
+    for (let i = 0; i < totalPages; i++) {
+      const pObj = pageObjNums[i];
+      const cObj = contentObjNums[i];
+      const streamData = pagesStreams[i];
+
+      objects[pObj] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_W} ${PAGE_H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${cObj} 0 R >>`;
+      objects[cObj] = `<< /Length ${streamData.length} >>\nstream\n${streamData}\nendstream`;
+    }
+
+    let pdf = "%PDF-1.4\n";
+    const offsets = [0];
+
+    for (let objNum = 1; objNum < objects.length; objNum++) {
+      offsets[objNum] = pdf.length;
+      pdf += `${objNum} 0 obj\n${objects[objNum]}\nendobj\n`;
+    }
+
+    const xrefStart = pdf.length;
+    pdf += `xref\n0 ${objects.length}\n`;
+    pdf += "0000000000 65535 f \n";
+    for (let objNum = 1; objNum < objects.length; objNum++) {
+      const paddedOffset = String(offsets[objNum]).padStart(10, "0");
+      pdf += `${paddedOffset} 00000 n \n`;
+    }
+
+    pdf += `trailer\n<< /Size ${objects.length} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+
+    const bytes = new Uint8Array(pdf.length);
+    for (let i = 0; i < pdf.length; i++) {
+      bytes[i] = pdf.charCodeAt(i) & 0xff;
+    }
+
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    triggerBlobDownload(blob, `grocery-list-${dateStamp}.pdf`);
+    showToast(`Exported grocery-list-${dateStamp}.pdf`);
+  }
+
+  // =========================================================================
+  // 11. EVENT LISTENERS (Delegated & Static)
+  // =========================================================================
+  document.addEventListener("click", function (e) {
+    // Stepper pill navigation
+    const stepBtn = e.target.closest(".step-pill");
+    if (stepBtn && stepBtn.dataset.step !== undefined) {
+      state.stepIndex = Number(stepBtn.dataset.step);
+      state.searchQuery = "";
+      renderApp();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    // Preset quantity chip
+    const presetBtn = e.target.closest('[data-action="preset"]');
+    if (presetBtn) {
+      const itemId = presetBtn.dataset.itemId;
+      const item = findItemById(itemId);
+      if (!item) return;
+
+      const sel = getItemSelection(item);
+      sel.rawQty = presetBtn.dataset.qty;
+      sel.numericQty = parseFloat(presetBtn.dataset.qty);
+      sel.unit = presetBtn.dataset.unit;
+
+      const qtyInput = document.getElementById(`qty_${itemId}`);
+      const unitSelect = document.getElementById(`unit_${itemId}`);
+      if (qtyInput) qtyInput.value = sel.rawQty;
+      if (unitSelect) unitSelect.value = sel.unit;
+
+      syncCardVisualState(itemId);
+      return;
+    }
+
+    // Clear individual item
+    const clearBtn = e.target.closest('[data-action="clear-item"]');
+    if (clearBtn) {
+      const itemId = clearBtn.dataset.itemId;
+      const item = findItemById(itemId);
+      if (!item) return;
+
+      const sel = getItemSelection(item);
+      sel.rawQty = "";
+      sel.numericQty = 0;
+
+      const qtyInput = document.getElementById(`qty_${itemId}`);
+      if (qtyInput) qtyInput.value = "";
+
+      syncCardVisualState(itemId);
+      return;
+    }
+
+    // Jump to edit from Review table
+    const editBtn = e.target.closest('[data-action="jump-edit"]');
+    if (editBtn) {
+      state.stepIndex = Number(editBtn.dataset.step);
+      state.searchQuery = "";
+      renderApp();
+      const targetInput = document.getElementById(`qty_${editBtn.dataset.itemId}`);
+      if (targetInput) {
+        targetInput.scrollIntoView({ behavior: "smooth", block: "center" });
+        targetInput.focus();
+      }
+      return;
+    }
+
+    // Add Custom Item
+    if (e.target.id === "btnAddCustomItem") {
+      const nameInput = document.getElementById("newItemName");
+      const hindiInput = document.getElementById("newItemHindi");
+      const subcatSelect = document.getElementById("newItemSubcat");
+      const unitSelect = document.getElementById("newItemUnit");
+
+      const name = (nameInput.value || "").trim();
+      if (!name) {
+        showToast("Please enter an item name first.");
+        nameInput.focus();
+        return;
+      }
+
+      const hindi = (hindiInput.value || "").trim() || "अन्य सामान";
+      const currentCat = GROCERY_CATALOG[state.stepIndex];
+      const newId = "custom_" + Date.now();
+
+      const newItem = {
+        id: newId,
+        categoryId: currentCat.id,
+        subcategoryId: subcatSelect.value,
+        name: name,
+        hindi: hindi,
+        defaultUnit: unitSelect.value,
+        brands: ["Loose / Local", "Tata Sampann", "Fortune", "Premia", "Patanjali"]
+      };
+
+      state.customItems.push(newItem);
+      // Pre-select with 1 unit so it's immediately ready
+      state.selections[newId] = {
+        brandMode: "preset",
+        brand: "Loose / Local",
+        customBrand: "",
+        rawQty: "1",
+        numericQty: 1,
+        unit: unitSelect.value
+      };
+
+      renderApp();
+      showToast(`Added "${name}" to ${currentCat.name}`);
+      return;
+    }
+
+    // Clear filter button
+    if (e.target.id === "btnClearSearch") {
+      state.searchQuery = "";
+      renderApp();
+      return;
+    }
+
+    // Summary Export & Navigation Buttons
+    if (e.target.closest("#btnExportPdf")) {
+      exportToPDF();
+      return;
+    }
+    if (e.target.closest("#btnExportCsv")) {
+      exportToCSV();
+      return;
+    }
+    if (e.target.closest("#btnCopyText")) {
+      copyGroceryListToClipboard();
+      return;
+    }
+    if (e.target.closest("#btnContinueShopping") || e.target.closest("#btnBackToStart")) {
+      state.stepIndex = 0;
+      renderApp();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+  });
+
+  // Input events (typing quantity like "1.5KG", typing custom brand, or searching)
+  document.addEventListener("input", function (e) {
+    // Search input
+    if (e.target.id === "catSearchInput") {
+      state.searchQuery = e.target.value;
+      const cursorPos = e.target.selectionStart;
+      renderCategoryStep(state.stepIndex);
+      const reInput = document.getElementById("catSearchInput");
+      if (reInput) {
+        reInput.focus();
+        reInput.setSelectionRange(cursorPos, cursorPos);
+      }
+      return;
+    }
+
+    // Quantity typing (supports "1.5KG", "500g", "2 L", "1.5")
+    if (e.target.dataset.action === "qty-input") {
+      const itemId = e.target.dataset.itemId;
+      const item = findItemById(itemId);
+      if (!item) return;
+
+      const sel = getItemSelection(item);
+      const parsed = parseQuantityInput(e.target.value, sel.unit);
+      sel.rawQty = parsed.rawQty;
+      sel.numericQty = parsed.numericQty;
+
+      if (parsed.detectedUnit) {
+        sel.unit = parsed.unit;
+        const unitSelect = document.getElementById(`unit_${itemId}`);
+        if (unitSelect) unitSelect.value = sel.unit;
+      }
+
+      syncCardVisualState(itemId);
+      return;
+    }
+
+    // Custom brand typing
+    if (e.target.dataset.action === "custom-brand-input") {
+      const itemId = e.target.dataset.itemId;
+      const item = findItemById(itemId);
+      if (!item) return;
+
+      const sel = getItemSelection(item);
+      sel.customBrand = e.target.value;
+      saveState();
+      return;
+    }
+  });
+
+  // Change events (dropdown selects)
+  document.addEventListener("change", function (e) {
+    // Brand select
+    if (e.target.dataset.action === "brand-select") {
+      const itemId = e.target.dataset.itemId;
+      const item = findItemById(itemId);
+      if (!item) return;
+
+      const sel = getItemSelection(item);
+      const val = e.target.value;
+      const customInput = document.getElementById(`custom_brand_${itemId}`);
+
+      if (val === "__OTHER__") {
+        sel.brandMode = "other";
+        if (customInput) {
+          customInput.style.display = "block";
+          customInput.focus();
+        }
+      } else {
+        sel.brandMode = "preset";
+        sel.brand = val;
+        if (customInput) {
+          customInput.style.display = "none";
+        }
+      }
+      saveState();
+      return;
+    }
+
+    // Unit select
+    if (e.target.dataset.action === "unit-select") {
+      const itemId = e.target.dataset.itemId;
+      const item = findItemById(itemId);
+      if (!item) return;
+
+      const sel = getItemSelection(item);
+      sel.unit = e.target.value;
+
+      // Normalize rawQty text if it previously had a glued unit like "1.5KG"
+      if (sel.numericQty > 0) {
+        sel.rawQty = String(sel.numericQty);
+        const qtyInput = document.getElementById(`qty_${itemId}`);
+        if (qtyInput) qtyInput.value = sel.rawQty;
+      }
+
+      syncCardVisualState(itemId);
+      return;
+    }
+  });
+
+  // Wizard Footer & Header Navigation Buttons
+  document.getElementById("btnPrevStep").addEventListener("click", function () {
+    if (state.stepIndex > 0) {
+      state.stepIndex--;
+      state.searchQuery = "";
+      renderApp();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  });
+
+  document.getElementById("btnNextStep").addEventListener("click", function () {
+    if (state.stepIndex < GROCERY_CATALOG.length) {
+      state.stepIndex++;
+      state.searchQuery = "";
+      renderApp();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  });
+
+  document.getElementById("btnTopReview").addEventListener("click", function () {
+    state.stepIndex = GROCERY_CATALOG.length;
+    state.searchQuery = "";
+    renderApp();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  document.getElementById("btnQuickFinish").addEventListener("click", function () {
+    state.stepIndex = GROCERY_CATALOG.length;
+    state.searchQuery = "";
+    renderApp();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // Reset Modal Handlers
+  const resetModal = document.getElementById("resetModal");
+  document.getElementById("btnResetTrigger").addEventListener("click", function () {
+    resetModal.classList.add("open");
+  });
+  document.getElementById("btnCancelReset").addEventListener("click", function () {
+    resetModal.classList.remove("open");
+  });
+  document.getElementById("btnConfirmReset").addEventListener("click", function () {
+    state.selections = {};
+    state.customItems = [];
+    state.stepIndex = 0;
+    state.searchQuery = "";
+    resetModal.classList.remove("open");
+    renderApp();
+    showToast("All selections cleared.");
+  });
+
+  // Initialize App
+  loadState();
+  renderApp();
+})();
+</script>
+</body>
+</html>

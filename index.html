@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>UtilityBox — Small tools, big convenience</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="./"><span class="brand-mark">u</span><span>utility<span class="brand-accent">box</span></span></a>
+    <nav><a href="#categories">Explore</a><a href="#about">About</a></nav>
+    <a class="github-link" href="https://github.com/" target="_blank" rel="noreferrer"><span>↗</span> GitHub</a>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="eyebrow"><span class="pulse"></span> YOUR PERSONAL TOOLKIT</div>
+      <h1>Small tools.<br><span>Big convenience.</span></h1>
+      <p class="hero-copy">A growing collection of quick, focused utilities. No sign-ups, no clutter — just open a tool and get things done.</p>
+      <div class="search-wrap"><span class="search-icon">⌕</span><input id="search" type="search" placeholder="Find a tool… try “GST” or “text”" autocomplete="off"><kbd>⌘ K</kbd></div>
+      <div class="hero-meta"><span><b id="tool-count">0</b> handy tools</span><i></i><span><b id="category-count">0</b> collections</span><i></i><span>Free to use</span></div>
+      <div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div>
+    </section>
+    <section class="quick-row" id="quick-row"></section>
+    <section class="section" id="categories">
+      <div class="section-heading"><div><div class="eyebrow muted">BROWSE COLLECTIONS</div><h2>Explore the toolbox</h2></div><div class="view-label">CURATED FOR EVERYDAY USE</div></div>
+      <div id="catalog" class="catalog"></div>
+      <div id="empty" class="empty hidden"><div class="empty-icon">⌕</div><h3>No tools found</h3><p>Try another keyword or clear your search.</p></div>
+    </section>
+    <section class="bottom-banner" id="about"><div class="banner-icon">✳</div><div><h3>Have a tiny problem to solve?</h3><p>Make a tiny tool for it. Add one HTML file and list it in the catalogue.</p></div><a href="https://github.com/" target="_blank" rel="noreferrer">Build something ↗</a></section>
+  </main>
+  <footer><a class="brand footer-brand" href="./"><span class="brand-mark">u</span><span>utility<span class="brand-accent">box</span></span></a><span>Made for useful little things.</span><span>Static · Lightweight · Yours</span></footer>
+  <script src="assets/js/catalog.js"></script><script src="assets/js/app.js"></script>
+</body></html>
