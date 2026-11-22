@@ -1,0 +1,115 @@
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>CipherPop — Private Text Encryption</title>
+<style>
+:root{--bg:#f1f2f6;--panel:#fff;--ink:#171923;--muted:#747b8d;--line:#dfe2ea;--blue:#3158f5;--blue-soft:#e6eaff;--shadow:0 12px 34px rgba(30,42,80,.06);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:15px;min-height:100vh}
+button,input,textarea{font:inherit}button{cursor:pointer;border:0}
+.topbar{height:86px;padding:18px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:11px;font-family:Arial,sans-serif;font-size:30px;font-weight:850;letter-spacing:-1.5px}
+.brand-mark{width:43px;height:43px;border-radius:13px;background:linear-gradient(145deg,#28c5d4,#3158f5 60%,#ffbd45);display:grid;place-items:center;color:#fff;font-size:24px;box-shadow:0 5px 12px #3158f533}
+.brand span span{color:var(--blue)}
+.top-actions{display:flex;align-items:center;gap:12px}.icon-btn{width:48px;height:48px;border-radius:50%;background:#e8eaf1;color:#202432;display:grid;place-items:center;font-size:21px;transition:.18s}.icon-btn:hover,.pill:hover{background:#dfe4f5}
+.shell{max-width:1160px;margin:8px auto 70px;padding:0 24px}
+.nav{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 24px}
+.pill{border-radius:28px;background:#e8eaf1;padding:12px 21px;color:#252936;font-size:15px;transition:.18s}
+.pill.active{background:var(--blue);color:white}
+.statusline{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:0 4px 16px;color:var(--muted);gap:15px}
+.status-left{display:flex;align-items:center;gap:12px}.small-pill{border-radius:20px;background:#e7e9f0;padding:7px 13px;color:#656d7e;font-size:13px}
+.workspace{max-width:850px;margin:38px auto 0}
+.intro{text-align:center;margin:0 0 28px}.intro h1{font-family:Arial,sans-serif;font-size:30px;letter-spacing:-.8px;margin:0 0 9px}.intro p{color:var(--muted);font-family:Arial,sans-serif;font-size:17px;margin:0}
+.card{background:var(--panel);border:1px solid #e7e9ef;border-radius:22px;padding:26px;box-shadow:var(--shadow)}
+.mode-switch{display:grid;grid-template-columns:1fr 1fr;background:#f0f1f5;border-radius:16px;padding:5px;margin-bottom:24px}
+.mode-switch button{border-radius:12px;padding:13px;background:transparent;color:#697184}.mode-switch button.active{background:var(--blue);color:#fff;box-shadow:0 4px 10px #3158f52b}
+.field{margin:18px 0}.field-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}.field label{font-weight:700;font-size:13px;letter-spacing:.03em}.hint{color:var(--muted);font-size:12px}
+.input-wrap{position:relative}
+input,textarea{width:100%;border:1px solid var(--line);border-radius:14px;background:#fbfbfd;color:var(--ink);padding:15px 16px;outline:none;transition:.15s}
+input:focus,textarea:focus{border-color:#8095ff;box-shadow:0 0 0 3px #3158f51a}
+input{padding-right:54px}textarea{resize:vertical;min-height:150px;line-height:1.6;font-size:14px}
+.eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;color:var(--muted);padding:8px}
+.primary{width:100%;background:var(--blue);color:#fff;border-radius:14px;padding:16px 20px;font-weight:700;box-shadow:0 7px 15px #3158f52b;transition:.18s}
+.primary:hover{background:#2348e8;transform:translateY(-1px)}.primary:disabled{opacity:.55;cursor:wait;transform:none}
+.output{margin-top:22px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fafbfe}
+.output-top{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700}
+.output-body{padding:15px;min-height:74px;white-space:pre-wrap;overflow-wrap:anywhere;color:#51596b;font-size:13px;line-height:1.65}
+.copy{background:var(--blue-soft);color:#2848d9;border-radius:9px;padding:8px 12px;font-size:12px;font-weight:700}
+.notice{display:flex;gap:10px;align-items:flex-start;color:#6d7484;font-size:12px;line-height:1.6;margin-top:18px}
+.dot{width:8px;height:8px;border-radius:50%;background:#35a56b;flex:none;margin-top:5px}
+.footer{display:flex;justify-content:center;gap:18px;color:#858b99;font-size:11px;margin:20px 0}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#202432;color:white;padding:12px 18px;border-radius:30px;font-size:13px;opacity:0;transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:650px){.topbar{padding:15px 17px;height:72px}.brand{font-size:25px}.top-actions{gap:7px}.icon-btn{width:40px;height:40px}.top-actions .icon-btn:nth-child(2){display:none}.shell{padding:0 14px;margin-top:10px}.nav{gap:7px}.pill{padding:10px 14px;font-size:13px}.statusline{font-size:12px}.workspace{margin-top:28px}.intro h1{font-size:25px}.intro p{font-size:15px}.card{padding:17px;border-radius:18px}}
+</style></head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="brand-mark">✦</div><span>Cipher<span>Pop</span></span></div>
+  <div class="top-actions">
+    <button class="icon-btn" title="Download this app" aria-label="Download" onclick="downloadApp()">⇩</button>
+    <button class="icon-btn" title="Security information" aria-label="Security info" onclick="showSecurity()">☷</button>
+    <button class="icon-btn" title="Focus key field" aria-label="Focus key" onclick="document.getElementById('secret').focus()">⌕</button>
+    <button class="icon-btn" title="Toggle theme" aria-label="Toggle theme" onclick="toggleTheme()">☾</button>
+  </div>
+</header>
+<main class="shell">
+  <nav class="nav" aria-label="Sections">
+    <button class="pill" id="nav-encrypt" onclick="setMode('encrypt')">Encrypt</button>
+    <button class="pill active" id="nav-decrypt" onclick="setMode('decrypt')">Decrypt</button>
+    <button class="pill" onclick="showHow()">How it works</button>
+    <button class="pill" onclick="clearAll()">Clear</button>
+  </nav>
+  <div class="statusline">
+    <div class="status-left"><span>Private workspace</span><span class="small-pill">No sign in required</span></div>
+    <span>● Local processing</span>
+  </div>
+  <section class="workspace">
+    <div class="intro">
+      <h1 id="heading">Bring your text back to life.</h1>
+      <p id="subheading">Paste encrypted text and reveal the original using your common secret.</p>
+    </div>
+    <div class="card">
+      <div class="mode-switch">
+        <button id="tab-encrypt" class="" onclick="setMode('encrypt')">↗ &nbsp; Encrypt</button>
+        <button id="tab-decrypt" onclick="setMode('decrypt')" class="active">↙ &nbsp; Decrypt</button>
+      </div>
+      <div class="field">
+        <div class="field-head"><label for="secret">YOUR COMMON SECRET KEY</label><span class="hint">Same key for both actions</span></div>
+        <div class="input-wrap">
+          <input id="secret" type="password" autocomplete="off" spellcheck="false" placeholder="Enter your top-level secret">
+          <button class="eye" type="button" onclick="toggleSecret()" aria-label="Show or hide secret">◉</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-head"><label id="text-label" for="source">ENCRYPTED TEXT TO DECRYPT</label><span class="hint" id="text-hint">Paste the complete CipherPop encrypted string</span></div>
+        <textarea id="source" spellcheck="false" placeholder="Paste the encrypted text you want to unlock..."></textarea>
+      </div>
+      <button class="primary" id="action" onclick="processText()">🔓 &nbsp; Decrypt text</button>
+      <div class="output">
+        <div class="output-top"><span id="result-label">DECRYPTED OUTPUT</span><button class="copy" onclick="copyResult()">Copy result</button></div>
+        <div class="output-body" id="result" aria-live="polite">Your result will appear here.</div>
+      </div>
+      <div class="notice"><span class="dot"></span><span><b>Private by design.</b> Encryption and decryption happen locally in your browser using Web Crypto. Your secret and text are never sent to a server. Keep your secret safe: there is no password reset or recovery.</span></div>
+    </div>
+    <div class="footer"><span>AES-256-GCM</span><span>PBKDF2 key derivation</span><span>Browser-only</span></div>
+  </section>
+</main>
+<div class="toast" id="toast">Workspace cleared.</div>
+<script>
+let mode='encrypt', lastResult='';
+const enc=new TextEncoder(), dec=new TextDecoder();
+function setMode(next){mode=next;document.getElementById('tab-encrypt').classList.toggle('active',mode==='encrypt');document.getElementById('tab-decrypt').classList.toggle('active',mode==='decrypt');document.getElementById('nav-encrypt').classList.toggle('active',mode==='encrypt');document.getElementById('nav-decrypt').classList.toggle('active',mode==='decrypt');document.getElementById('heading').textContent=mode==='encrypt'?'Keep your secrets private.':'Bring your text back to life.';document.getElementById('subheading').textContent=mode==='encrypt'?'Turn sensitive text into encrypted text you can store anywhere.':'Paste encrypted text and reveal the original using your common secret.';document.getElementById('text-label').textContent=mode==='encrypt'?'TEXT TO ENCRYPT':'ENCRYPTED TEXT TO DECRYPT';document.getElementById('text-hint').textContent=mode==='encrypt'?'Your original text stays in this browser':'Paste the complete CipherPop encrypted string';document.getElementById('source').placeholder=mode==='encrypt'?'Paste or type the text you want to protect...':'Paste the encrypted text you want to unlock...';document.getElementById('action').innerHTML=mode==='encrypt'?'🔒 &nbsp; Encrypt text':'🔓 &nbsp; Decrypt text';document.getElementById('result-label').textContent=mode==='encrypt'?'ENCRYPTED OUTPUT':'DECRYPTED OUTPUT';document.getElementById('result').textContent='Your result will appear here.';lastResult='';}
+function b64(bytes){let s='';bytes.forEach(b=>s+=String.fromCharCode(b));return btoa(s)}
+function unb64(s){const bin=atob(s);return Uint8Array.from(bin,c=>c.charCodeAt(0))}
+function randomBytes(n){return crypto.getRandomValues(new Uint8Array(n))}
+async function deriveKey(secret,salt){const material=await crypto.subtle.importKey('raw',enc.encode(secret),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:600000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function processText(){const secret=document.getElementById('secret').value;const source=document.getElementById('source').value;const btn=document.getElementById('action');if(!secret){toast('Enter your common secret key first.');document.getElementById('secret').focus();return}if(!source.trim()){toast('Enter some text first.');return}btn.disabled=true;btn.textContent=mode==='encrypt'?'Encrypting securely…':'Decrypting…';try{if(mode==='encrypt'){const salt=randomBytes(16),iv=randomBytes(12),key=await deriveKey(secret,salt);const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(source));const payload={v:1,alg:'A256GCM',kdf:'PBKDF2-SHA256',iter:600000,salt:b64(salt),iv:b64(iv),data:b64(new Uint8Array(cipher))};lastResult='CIPHERPOP1.'+b64(enc.encode(JSON.stringify(payload)));document.getElementById('result').textContent=lastResult;toast('Text encrypted successfully.')}else{let token=source.trim();if(!token.startsWith('CIPHERPOP1.'))throw new Error('This does not look like a CipherPop encrypted string.');const payload=JSON.parse(dec.decode(unb64(token.slice(11))));if(payload.v!==1||payload.alg!=='A256GCM'||payload.kdf!=='PBKDF2-SHA256'||payload.iter!==600000)throw new Error('Unsupported or invalid encrypted format.');const key=await deriveKey(secret,unb64(payload.salt));const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(payload.iv)},key,unb64(payload.data));lastResult=dec.decode(plain);document.getElementById('result').textContent=lastResult;toast('Text decrypted successfully.')} }catch(e){document.getElementById('result').textContent='Unable to decrypt. Check that the secret and encrypted text are correct.';lastResult='';toast(mode==='decrypt'?'Wrong secret or damaged encrypted text.':'Encryption failed. Please try again.');}finally{btn.disabled=false;btn.innerHTML=mode==='encrypt'?'🔒 &nbsp; Encrypt text':'🔓 &nbsp; Decrypt text';}}
+async function copyResult(){if(!lastResult){toast('There is no result to copy yet.');return}try{await navigator.clipboard.writeText(lastResult);toast('Copied to clipboard.')}catch(e){toast('Clipboard access unavailable. Select and copy the result.');}}
+function toggleSecret(){const el=document.getElementById('secret');el.type=el.type==='password'?'text':'password'}
+function clearAll(){document.getElementById('secret').value='';document.getElementById('source').value='';document.getElementById('result').textContent='Your result will appear here.';lastResult='';toast('Workspace cleared.')}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(window._toastTimer);window._toastTimer=setTimeout(()=>el.classList.remove('show'),2600)}
+function showHow(){alert('1. Enter a strong common secret. 2. Encrypt your text. 3. Copy the CIPHERPOP1 string into your spreadsheet or notes. 4. Later, paste it into Decrypt and enter the same secret. A fresh random salt and IV are generated for every encryption.')}
+function showSecurity(){alert('CipherPop uses the browser Web Crypto API: AES-256-GCM with a key derived using PBKDF2-SHA-256 (600,000 iterations). No network requests are made by the app. Use a strong, unique secret and keep a backup. Anyone who knows the secret can decrypt your data.')}
+function toggleTheme(){document.body.classList.toggle('dark');if(document.body.classList.contains('dark')){document.documentElement.style.setProperty('--bg','#171a24');document.documentElement.style.setProperty('--panel','#222634');document.documentElement.style.setProperty('--ink','#f1f3fa');document.documentElement.style.setProperty('--muted','#a3aabd');document.documentElement.style.setProperty('--line','#3a4052');document.documentElement.style.setProperty('--shadow','0 12px 34px rgba(0,0,0,.18)')}else{['--bg','--panel','--ink','--muted','--line','--shadow'].forEach((p,i)=>document.documentElement.style.removeProperty(p))}}
+function downloadApp(){const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cipherpop.html';a.click();URL.revokeObjectURL(a.href)}
+</script>
+</body>
+</html>
