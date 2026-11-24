@@ -1495,12 +1495,19 @@
       </button>
     `;
 
+    const prevScroll = track.scrollLeft;
     track.innerHTML = html;
+    track.scrollLeft = prevScroll;
 
-    // Scroll active pill into view
+    // Center the active pill only when the step changed, and only scroll the
+    // pill strip itself. scrollIntoView() would also scroll the whole page up
+    // to the stepper on every quantity edit.
     const activeEl = track.querySelector(".step-pill.active");
-    if (activeEl) {
-      activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    if (activeEl && track.dataset.lastStep !== String(state.stepIndex)) {
+      track.dataset.lastStep = String(state.stepIndex);
+      const tr = track.getBoundingClientRect(), ar = activeEl.getBoundingClientRect();
+      const target = track.scrollLeft + (ar.left - tr.left) - (tr.width - ar.width) / 2;
+      track.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
     }
   }
 
