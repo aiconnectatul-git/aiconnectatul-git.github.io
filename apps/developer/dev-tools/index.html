@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<title>Dev Tools — Base64, JWT, JSON, Time & more</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1220;--panel:#111c2e;--panel2:#0d1727;--line:rgba(174,196,226,.13);--text:#f2f6fc;--muted:#8a9bb3;--mint:#8ce4c0;--blue:#9bb8ff;--bad:#ff8f9c;--warn:#ffd28a;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}html{color-scheme:dark}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:15px/1.5 "DM Sans",system-ui,sans-serif;padding:24px 20px 60px;position:relative;overflow-x:hidden}
+body:before,body:after{content:"";position:fixed;border-radius:50%;filter:blur(110px);opacity:.16;pointer-events:none;z-index:-1}
+body:before{width:460px;height:460px;background:#286e9e;top:-120px;right:-120px}
+body:after{width:400px;height:400px;background:#236c59;bottom:-140px;left:-140px}
+.wrap{max-width:1180px;margin:0 auto}
+.back{color:var(--mint);text-decoration:none;font-size:13px;font-weight:700}.back:hover{text-decoration:underline}
+.app{display:grid;grid-template-columns:230px minmax(0,1fr);gap:26px;margin-top:22px;align-items:start}
+.side{position:sticky;top:20px;background:linear-gradient(160deg,#142238,#0f1a2b);border:1px solid var(--line);border-radius:22px;padding:14px}
+.brand{display:flex;gap:12px;align-items:center;padding:6px 8px 16px}
+.mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#8ce4c0,#9bb8ff);color:#0b1f1a;font:700 15px var(--mono);letter-spacing:-1px}
+.brand b{font:700 19px "Space Grotesk";letter-spacing:-.8px;display:block;line-height:1.1}
+.brand small{font-size:9px;letter-spacing:1.8px;font-weight:700;color:var(--mint)}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav a{display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:12px;color:#aab8cc;text-decoration:none;font-weight:600;font-size:13.5px;transition:.15s}
+.nav a i{font:500 11px var(--mono);font-style:normal;width:30px;height:26px;border-radius:8px;background:#ffffff0a;display:grid;place-items:center;color:var(--muted);transition:.15s;flex-shrink:0}
+.nav a:hover{background:#ffffff08;color:#fff}
+.nav a.on{background:#8ce4c01a;color:var(--mint)}.nav a.on i{background:var(--mint);color:#0b1f1a}
+.main{min-width:0}
+.thead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+.kicker{font-size:10px;letter-spacing:2px;font-weight:700;color:var(--mint)}
+h1{font:700 clamp(28px,5vw,38px)/1.05 "Space Grotesk";letter-spacing:-1.5px;margin:5px 0 6px}
+.desc{color:var(--muted);font-size:13.5px;margin:0}
+.seg{position:relative;display:inline-grid;grid-template-columns:1fr 1fr;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:4px}
+.seg button{position:relative;z-index:1;background:none;border:0;color:var(--muted);font:600 14px "DM Sans";padding:10px 24px;cursor:pointer;border-radius:10px;transition:color .2s}
+.seg button[aria-selected=true]{color:#0b1f1a}
+.seg i{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:10px;background:var(--mint);transition:transform .28s cubic-bezier(.4,.1,.2,1)}
+.seg[data-v="1"] i{transform:translateX(100%)}
+.stage{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch}
+.stage.two{grid-template-columns:1fr 1fr}.stage.one{grid-template-columns:1fr}
+.card{background:linear-gradient(160deg,#142238,#0f1a2b);border:1px solid var(--line);border-radius:22px;display:flex;flex-direction:column;min-width:0;transition:border-color .2s,box-shadow .2s}
+.card:focus-within{border-color:#8ce4c055;box-shadow:0 0 0 4px #8ce4c012}
+.card.drag{border-color:var(--mint);box-shadow:0 0 0 4px #8ce4c022}
+.card.err{border-color:#ff8f9c66}
+.chead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px 0;flex-wrap:wrap}
+.label{font-size:10px;letter-spacing:1.6px;font-weight:700;color:var(--muted)}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:#ffffff0a;border:1px solid var(--line);color:#c9d6e8;border-radius:9px;font:600 11.5px "DM Sans";padding:6px 11px;cursor:pointer;transition:.15s;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+.chip:hover{border-color:#8ce4c066;color:var(--mint)}.chip:disabled{opacity:.35;pointer-events:none}
+.chip.on{background:var(--mint);border-color:var(--mint);color:#0b1f1a}
+textarea,.out{flex:1;min-height:260px;width:100%;resize:none;background:transparent;border:0;outline:0;color:var(--text);font:400 13.5px/1.7 var(--mono);padding:14px 18px;word-break:break-all;white-space:pre-wrap;overflow:auto;margin:0}
+textarea::placeholder{color:#5d6e86}
+.ro{color:var(--mint)}
+.cfoot{display:flex;justify-content:space-between;gap:10px;padding:12px 18px 15px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);min-height:46px}
+.cfoot b{color:#dbe6f5;font-weight:600}.msg.bad{color:var(--bad)}.msg.good{color:var(--mint)}
+.mid{display:flex;align-items:center}
+.swap{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--mint);font-size:18px;cursor:pointer;transition:.25s}
+.swap:hover{transform:rotate(180deg);border-color:#8ce4c066}
+.opts{display:flex;gap:22px;flex-wrap:wrap;align-items:center;margin-top:18px;color:var(--muted);font-size:13px}
+.sw{display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none}.sw input{display:none}
+.sw span{width:34px;height:20px;border-radius:99px;background:#26364e;position:relative;transition:.2s}
+.sw span:after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#9db0c9;transition:.2s}
+.sw input:checked+span{background:var(--mint)}.sw input:checked+span:after{left:17px;background:#0b1f1a}
+.hint{margin-left:auto;font-size:12px;color:#5d6e86}
+.field{background:var(--panel2);border:1px solid var(--line);border-radius:12px;color:var(--text);font:500 13.5px var(--mono);padding:10px 12px;outline:0;min-width:0}
+.field:focus{border-color:#8ce4c066}select.field{font-family:"DM Sans";font-weight:600;cursor:pointer}
+.rows{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:14px;padding:13px 18px;border-top:1px solid var(--line);cursor:pointer;transition:background .15s}
+.row:first-child{border-top:0}.row:hover{background:#ffffff06}
+.row .k{width:118px;flex-shrink:0;font-size:10px;letter-spacing:1.4px;font-weight:700;color:var(--muted)}
+.row .v{flex:1;font:500 13.5px var(--mono);color:var(--mint);word-break:break-all;min-width:0}
+.row .c{font-size:11px;color:#5d6e86;opacity:0;transition:.15s}.row:hover .c{opacity:1}
+.pad{padding:18px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}.stack>*{min-width:0}
+.badge{display:inline-block;font:700 10px "DM Sans";letter-spacing:1px;padding:3px 8px;border-radius:99px;background:#8ce4c022;color:var(--mint);margin-left:8px;vertical-align:middle}
+.badge.bad{background:#ff8f9c22;color:var(--bad)}.badge.warn{background:#ffd28a22;color:var(--warn)}
+.stack{display:flex;flex-direction:column;gap:14px}
+mark{background:#8ce4c033;color:var(--mint);border-radius:4px;padding:0 1px}
+.hl{color:#dbe6f5}
+.tok{color:var(--blue)}
+/* Full-height tools (JSON): panes stretch to fill the viewport */
+body:has(.main.fill){padding-bottom:18px}
+.main.fill{display:flex;flex-direction:column;height:calc(100vh - 112px);min-height:460px}
+.main.fill .thead{flex:none;margin-bottom:16px}.main.fill .opts{flex:none}
+.main.fill .stage{flex:1;min-height:0;grid-template-rows:minmax(0,1fr)}
+.main.fill .card{min-height:0}.main.fill textarea{min-height:0;overflow:auto}
+@media(max-width:860px){.main.fill{height:auto;min-height:0}.main.fill .stage{grid-template-rows:none}.main.fill textarea{min-height:190px}.main.fill .klist{min-height:140px}body:has(.main.fill){padding-bottom:60px}}
+.stage.k3{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 250px}
+.klist{flex:1;min-height:0;overflow:auto;padding:8px 6px}
+.krow{display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:8px;cursor:pointer;font:500 12.5px var(--mono);color:#dbe6f5;transition:background .12s}
+.krow:hover{background:#ffffff08}.krow.dim{opacity:.4}
+.krow input{accent-color:#8ce4c0;width:15px;height:15px;flex-shrink:0;margin:0}
+.krow .kn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.krow .kc{margin-left:auto;font-size:10px;color:var(--muted)}
+.kempty{padding:14px;color:#5d6e86;font-size:12.5px}
+@media(max-width:860px){.stage.k3{grid-template-columns:minmax(0,1fr)}.klist{max-height:240px}}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--mint);color:#0b1f1a;font-weight:700;font-size:13px;padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:.25s;z-index:9}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media(max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr);gap:16px}.side{min-width:0}
+  .side{position:static;padding:10px;border-radius:18px}.brand{display:none}
+  .nav{flex-direction:row;overflow-x:auto;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
+  .nav a{white-space:nowrap;padding:8px 12px}.nav a i{display:none}
+  .stage,.stage.two{grid-template-columns:minmax(0,1fr)}.mid{justify-content:center;margin:-4px 0}.swap{transform:rotate(90deg)}.swap:hover{transform:rotate(270deg)}
+  textarea,.out{min-height:190px}.hint{display:none}.grid2{grid-template-columns:minmax(0,1fr)}
+  .row{flex-wrap:wrap;gap:4px}.row .k{width:100%}
+  textarea,.field{font-size:16px}
+}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../../../index.html">← Back to tools</a>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="mark">&lt;/&gt;</div><div><small>DEVELOPER</small><b>Dev Tools</b></div></div>
+    <nav class="nav" id="nav"></nav>
+  </aside>
+  <main class="main" id="main"></main>
+</div></div>
+<div class="toast" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let tt;function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),1600)}
+const copyText=async t=>{try{await navigator.clipboard.writeText(t);toast("Copied to clipboard")}catch(e){toast("Copy not allowed here")}};
+const fmtB=n=>n<1024?n+" B":n<1048576?(n/1024).toFixed(1)+" KB":(n/1048576).toFixed(2)+" MB";
+let cleanup=()=>{};
+
+/* ---------- UI builders ---------- */
+const chip=(id,label,cls="")=>`<button class="chip ${cls}" id="${id}">${label}</button>`;
+const pane=(id,label,o={})=>`<section class="card" id="${id}Card"><div class="chead"><span class="label" id="${id}Label">${label}</span><div class="tools">${o.tools||""}</div></div>${o.ro?`<div class="out ro" id="${id}"></div>`:`<textarea id="${id}" spellcheck="false" placeholder="${o.ph||""}"></textarea>`}<div class="cfoot"><span id="${id}Stat"></span><span class="msg" id="${id}Msg"></span></div></section>`;
+const seg=(a,b,v=0)=>`<div class="seg" id="seg" data-v="${v}"><i></i><button data-v="0" aria-selected="${v==0}">${a}</button><button data-v="1" aria-selected="${v==1}">${b}</button></div>`;
+const sw=(id,label,on)=>`<label class="sw"><input type="checkbox" id="${id}" ${on?"checked":""}><span></span>${label}</label>`;
+const head=t=>`<div class="thead"><div><div class="kicker">DEV TOOLS</div><h1>${t.name}</h1><p class="desc">${t.desc}</p></div>${t.head?t.head:""}</div>`;
+const setVal=(id,v)=>{const e=$(id);if("value" in e)e.value=v;else e.textContent=v};
+const getVal=id=>{const e=$(id);return "value" in e?e.value:e.textContent};
+const stat=(id,h)=>$(id+"Stat").innerHTML=h;
+const msg=(id,t,cls)=>{const m=$(id+"Msg");m.textContent=t||"";m.className="msg "+(cls||"");$(id+"Card").classList.toggle("err",cls==="bad")};
+function wireSeg(cb){const s=$("seg");s.querySelectorAll("button").forEach(b=>b.onclick=()=>{s.dataset.v=b.dataset.v;s.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected",x===b));cb(+b.dataset.v)})}
+function rows(el,list){el.innerHTML=list.map(([k,v,x])=>`<div class="row" data-v="${esc(v)}"><span class="k">${k}</span><span class="v">${esc(v)}${x||""}</span><span class="c">COPY</span></div>`).join("");el.querySelectorAll(".row").forEach(r=>r.onclick=()=>copyText(r.dataset.v))}
+const bind=(id,fn)=>$(id).addEventListener("input",fn);
+const onclick=(id,fn)=>{const e=$(id);if(e)e.onclick=fn};
+
+/* ---------- TOOLS ---------- */
+const TOOLS=[];
+
+/* Base64 */
+TOOLS.push({id:"base64",ico:"64",name:"Base64",desc:"Encode and decode text or files. UTF-8 safe, URL-safe option, runs locally.",
+render(){
+  const S={mode:0,bytes:null,name:"",out:null};
+  const dec=new TextDecoder("utf-8",{fatal:true});
+  $("main").innerHTML=head({...this,head:seg("Encode","Decode")})+`<div class="stage">${pane("i","TEXT",{ph:"Type or paste text — or drop a file here",tools:chip("file","↑ File")+chip("paste","Paste")+chip("clear","Clear")})}<div class="mid"><button class="swap" id="swap" aria-label="Swap">⇄</button></div>${pane("o","BASE64",{tools:chip("dl","↓ Save")+chip("copy","Copy")}).replace("<textarea","<textarea readonly")}</div>
+  <div class="opts">${sw("url","URL-safe")}${sw("wrap","Wrap at 76")}${sw("pad","Padding “=”",1)}<span class="hint">Runs entirely in your browser</span></div><input type="file" id="fileIn" hidden>`;
+  const toB64=b=>{let s="";for(let i=0;i<b.length;i+=8192)s+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(s)};
+  const fromB64=s=>{const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a};
+  function run(){const v=getVal("i");let out="";S.out=null;msg("i","");let ok=true;
+    try{if(!S.mode){const bytes=S.bytes||new TextEncoder().encode(v);out=(v||S.bytes)?toB64(bytes):"";
+        if($("url").checked)out=out.replace(/\+/g,"-").replace(/\//g,"_");if(!$("pad").checked)out=out.replace(/=+$/,"");if($("wrap").checked)out=out.replace(/(.{76})/g,"$1\n").trim();
+        stat("i",S.bytes?`<b>${esc(S.name)}</b> · ${fmtB(S.bytes.length)}`:`<b>${v.length}</b> chars · ${fmtB(bytes.length)}`);
+        stat("o",`<b>${out.length}</b> chars`+(out&&bytes.length?` · <b>+${Math.round((out.length/bytes.length-1)*100)}%</b>`:""))}
+      else{let c=v.replace(/\s+/g,"").replace(/-/g,"+").replace(/_/g,"/");
+        if(c){if(/[^A-Za-z0-9+/=]/.test(c))throw 0;c=c.replace(/=+$/,"");if(c.length%4===1)throw 0;c+="=".repeat((4-c.length%4)%4);const bytes=fromB64(c);S.out=bytes;
+          try{out=dec.decode(bytes)}catch(e){msg("i","Binary data — use Save to download.","good")}}
+        stat("i",`<b>${v.length}</b> chars`);stat("o",`<b>${out.length}</b> chars`+(S.out?` · <b>${fmtB(S.out.length)}</b>`:""))}
+    }catch(e){ok=false;msg("i","That doesn’t look like valid Base64.","bad");setVal("o","");stat("o","")}
+    if(ok)setVal("o",out);$("copy").disabled=!out;$("dl").disabled=!(out||S.out)||!ok}
+  function mode(m){S.mode=m;S.bytes=null;$("seg").dataset.v=m;$("seg").querySelectorAll("button").forEach(b=>b.setAttribute("aria-selected",+b.dataset.v===m));
+    $("iLabel").textContent=m?"BASE64":"TEXT";$("oLabel").textContent=m?"TEXT":"BASE64";$("i").placeholder=m?"Paste a Base64 string — or drop a .txt file":"Type or paste text — or drop a file here";run()}
+  wireSeg(mode);bind("i",()=>{S.bytes=null;run()});["url","wrap","pad"].forEach(i=>$(i).onchange=run);
+  onclick("swap",()=>{const o=getVal("o");mode(S.mode?0:1);setVal("i",o);run()});
+  onclick("clear",()=>{setVal("i","");S.bytes=null;run();$("i").focus()});
+  onclick("paste",async()=>{try{setVal("i",await navigator.clipboard.readText());S.bytes=null;run()}catch(e){toast("Allow clipboard access to paste")}});
+  onclick("copy",()=>copyText(getVal("o")));onclick("file",()=>$("fileIn").click());$("fileIn").onchange=e=>load(e.target.files[0]);
+  async function load(f){if(!f)return;const buf=new Uint8Array(await f.arrayBuffer());if(!S.mode){S.bytes=buf;S.name=f.name;setVal("i","");run()}else{setVal("i",new TextDecoder().decode(buf).trim());run()}}
+  onclick("dl",()=>{const d=S.mode?S.out:getVal("o");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([d]));a.download=S.mode?"decoded.bin":"encoded.txt";a.click();URL.revokeObjectURL(a.href)});
+  const card=$("iCard");["dragenter","dragover"].forEach(t=>card.addEventListener(t,e=>{e.preventDefault();card.classList.add("drag")}));["dragleave","drop"].forEach(t=>card.addEventListener(t,e=>{e.preventDefault();card.classList.remove("drag")}));card.addEventListener("drop",e=>load(e.dataTransfer.files[0]));
+  run()}});
+
+/* Text Case */
+TOOLS.push({id:"case",ico:"Aa",name:"Text Case",desc:"Convert text between UPPER, lower, Title, camelCase, snake_case and more.",
+render(){
+  const words=s=>s.replace(/([a-z0-9])([A-Z])/g,"$1 $2").replace(/([A-Z]+)([A-Z][a-z])/g,"$1 $2").split(/[^A-Za-z0-9À-ɏ]+/).filter(Boolean);
+  const cap=w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
+  const C=[["upper","UPPER CASE",s=>s.toUpperCase()],["lower","lower case",s=>s.toLowerCase()],["title","Title Case",s=>s.toLowerCase().replace(/(^|[\s\-—(])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase())],
+    ["sentence","Sentence case",s=>s.toLowerCase().replace(/(^\s*\p{L}|[.!?]\s+\p{L})/gu,c=>c.toUpperCase())],["camel","camelCase",s=>{const w=words(s);return w.map((x,i)=>i?cap(x):x.toLowerCase()).join("")}],
+    ["pascal","PascalCase",s=>words(s).map(cap).join("")],["snake","snake_case",s=>words(s).map(x=>x.toLowerCase()).join("_")],["kebab","kebab-case",s=>words(s).map(x=>x.toLowerCase()).join("-")],
+    ["constant","CONSTANT_CASE",s=>words(s).map(x=>x.toUpperCase()).join("_")],["dot","dot.case",s=>words(s).map(x=>x.toLowerCase()).join(".")],
+    ["alt","aLtErNaTiNg",s=>[...s].map((c,i)=>i%2?c.toUpperCase():c.toLowerCase()).join("")],["rev","Reverse",s=>[...s].reverse().join("")]];
+  let cur="title";
+  $("main").innerHTML=head(this)+`<div class="card" style="margin-bottom:14px"><div class="chead" style="padding-bottom:16px"><div class="tools">${C.map(c=>chip("c_"+c[0],c[1],c[0]===cur?"on":"")).join("")}</div></div></div>
+  <div class="stage two">${pane("i","INPUT",{ph:"Type or paste your text…",tools:chip("clear","Clear")})}${pane("o","RESULT",{tools:chip("copy","Copy")}).replace("<textarea","<textarea readonly")}</div>`;
+  const run=()=>{const v=getVal("i");const r=C.find(c=>c[0]===cur)[2](v);setVal("o",r);stat("i",`<b>${v.length}</b> chars · <b>${(v.match(/\S+/g)||[]).length}</b> words · <b>${v?v.split("\n").length:0}</b> lines`);stat("o",`<b>${r.length}</b> chars`);$("copy").disabled=!r};
+  C.forEach(c=>$("c_"+c[0]).onclick=()=>{cur=c[0];C.forEach(x=>$("c_"+x[0]).classList.toggle("on",x[0]===cur));run()});
+  bind("i",run);onclick("clear",()=>{setVal("i","");run();$("i").focus()});onclick("copy",()=>copyText(getVal("o")));run()}});
+
+/* URL */
+TOOLS.push({id:"url",ico:"%",name:"URL Encode / Decode",desc:"Percent-encode or decode strings and URLs, and inspect query parameters.",
+render(){
+  let m=0;
+  $("main").innerHTML=head({...this,head:seg("Encode","Decode")})+`<div class="stage">${pane("i","TEXT",{ph:"Paste text or a URL…",tools:chip("clear","Clear")})}<div class="mid"><button class="swap" id="swap" aria-label="Swap">⇄</button></div>${pane("o","ENCODED",{tools:chip("copy","Copy")}).replace("<textarea","<textarea readonly")}</div>
+  <div class="opts">${sw("full","Keep URL structure (encodeURI)")}${sw("plus","Space as +")}</div>
+  <div class="card" id="qCard" style="margin-top:18px;display:none"><div class="chead"><span class="label">PARSED URL</span></div><div class="rows" id="qrows" style="margin-top:12px"></div></div>`;
+  function run(){const v=getVal("i");let out="";msg("i","");
+    try{if(!m){out=$("full").checked?encodeURI(v):encodeURIComponent(v);if($("plus").checked)out=out.replace(/%20/g,"+")}else{out=($("full").checked?decodeURI:decodeURIComponent)($("plus").checked?v.replace(/\+/g," "):v)}}
+    catch(e){msg("i","Malformed percent-encoding.","bad")}
+    setVal("o",out);stat("i",`<b>${v.length}</b> chars`);stat("o",`<b>${out.length}</b> chars`);$("copy").disabled=!out;
+    const src=m?out:v;let u;try{u=new URL(src.trim())}catch(e){}
+    $("qCard").style.display=u?"block":"none";
+    if(u){const L=[["PROTOCOL",u.protocol],["HOST",u.host],["PATH",u.pathname]];if(u.hash)L.push(["HASH",u.hash]);[...u.searchParams].forEach(([k,val])=>L.push(["? "+k.toUpperCase().slice(0,14),val]));rows($("qrows"),L)}}
+  function mode(x){m=x;$("seg").dataset.v=x;$("seg").querySelectorAll("button").forEach(b=>b.setAttribute("aria-selected",+b.dataset.v===x));$("iLabel").textContent=x?"ENCODED":"TEXT";$("oLabel").textContent=x?"TEXT":"ENCODED";run()}
+  wireSeg(mode);bind("i",run);["full","plus"].forEach(i=>$(i).onchange=run);
+  onclick("swap",()=>{const o=getVal("o");mode(m?0:1);setVal("i",o);run()});onclick("clear",()=>{setVal("i","");run();$("i").focus()});onclick("copy",()=>copyText(getVal("o")));run()}});
+
+/* Time */
+TOOLS.push({id:"time",ico:"UTC",name:"UTC Time & Converter",desc:"Live UTC clock, Unix timestamps and a converter for dates and epochs.",
+render(){
+  const ZONES=["UTC","Asia/Kolkata","America/New_York","America/Los_Angeles","Europe/London","Europe/Berlin","Asia/Dubai","Asia/Singapore","Asia/Tokyo","Australia/Sydney"];
+  const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  $("main").innerHTML=head(this)+`<div class="card"><div class="chead"><span class="label">RIGHT NOW · UTC</span><div class="tools">${chip("useNow","Use in converter")}</div></div><div class="rows" id="now" style="margin-top:12px"></div></div>
+  <div class="card" style="margin-top:18px"><div class="chead"><span class="label">CONVERTER</span><div class="tools"><select class="field" id="zone" style="padding:6px 10px;font-size:12px">${[...new Set([tz,...ZONES])].map(z=>`<option>${z}</option>`).join("")}</select></div></div>
+  <div class="pad"><input class="field" id="ti" style="width:100%" placeholder="Epoch (1700000000 or ms) · 2025-01-31T10:30:00Z · 2025-01-31 10:30" autocomplete="off"><div id="tmsg" class="msg" style="margin-top:8px;font-size:12px;min-height:18px"></div></div><div class="rows" id="conv"></div></div>`;
+  const fmtZ=(d,z)=>new Intl.DateTimeFormat("en-GB",{timeZone:z,dateStyle:"full",timeStyle:"long"}).format(d);
+  const rel=d=>{const s=Math.round((d-Date.now())/1000),a=Math.abs(s),u=a<60?[a,"second"]:a<3600?[a/60,"minute"]:a<86400?[a/3600,"hour"]:a<2592000?[a/86400,"day"]:a<31536000?[a/2592000,"month"]:[a/31536000,"year"];
+    return new Intl.RelativeTimeFormat("en",{numeric:"auto"}).format(Math.round(s<0?-u[0]:u[0]),u[1])};
+  const list=d=>[["UTC ISO",d.toISOString()],["UTC",d.toUTCString()],["UNIX SECONDS",String(Math.floor(d/1000))],["UNIX MS",String(+d)],["IN "+$("zone").value.split("/").pop().replace("_"," ").toUpperCase().slice(0,12),fmtZ(d,$("zone").value)],["RELATIVE",rel(d)]];
+  const tick=()=>rows($("now"),list(new Date()).slice(0,4).concat([["LOCAL ("+tz.split("/").pop()+")",new Date().toString().replace(/ \(.*\)/,"")]]));
+  function conv(){const v=$("ti").value.trim();$("tmsg").textContent="";$("tmsg").className="msg";if(!v){$("conv").innerHTML="";return}
+    let d,note="";if(/^-?\d+(\.\d+)?$/.test(v)){const n=parseFloat(v);const ms=Math.abs(n)<1e11?n*1000:Math.abs(n)<1e14?n:Math.abs(n)<1e17?n/1000:n/1e6;note=Math.abs(n)<1e11?"Read as seconds":Math.abs(n)<1e14?"Read as milliseconds":"Read as micro/nanoseconds";d=new Date(ms)}
+    else{const s=/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(v)?v.replace(" ","T")+"Z":v;d=new Date(s);if(!/[zZ]|[+-]\d{2}:?\d{2}$|GMT|UTC/.test(v)&&/^\d{4}-\d{2}-\d{2}[ T]/.test(v))note="No zone given — read as UTC"}
+    if(isNaN(d)){$("tmsg").textContent="Couldn’t read that as a date or timestamp.";$("tmsg").className="msg bad";$("conv").innerHTML="";return}
+    $("tmsg").textContent=note;rows($("conv"),list(d))}
+  tick();const iv=setInterval(()=>{tick();if($("ti").value&&/^\s*$/.test("")){}},1000);cleanup=()=>clearInterval(iv);
+  bind("ti",conv);$("zone").onchange=conv;onclick("useNow",()=>{$("ti").value=String(Date.now());conv()})}});
+
+/* JWT */
+TOOLS.push({id:"jwt",ico:"JWT",name:"JWT Decoder",desc:"Inspect a token’s header, payload and expiry. Decoded locally — signatures are not verified.",
+render(){
+  $("main").innerHTML=head(this)+`<div class="stack">${pane("i","TOKEN",{ph:"Paste a JWT: eyJhbGciOi…",tools:chip("sample","Sample")+chip("clear","Clear")})}<div class="grid2">${pane("h","HEADER",{ro:1,tools:chip("ch","Copy")})}${pane("p","PAYLOAD",{ro:1,tools:chip("cp","Copy")})}</div>
+  <div class="card"><div class="chead"><span class="label">CLAIMS</span></div><div class="rows" id="claims" style="margin-top:12px"><div class="row"><span class="v" style="color:var(--muted)">Paste a token to see claims.</span></div></div></div></div>`;
+  const b64j=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");s+="=".repeat((4-s.length%4)%4);const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return new TextDecoder().decode(a)};
+  const when=t=>new Date(t*1000).toISOString().replace("T"," ").replace(".000Z"," UTC");
+  function run(){const v=getVal("i").trim().replace(/^bearer\s+/i,"");msg("i","");setVal("h","");setVal("p","");
+    if(!v){$("claims").innerHTML=`<div class="row"><span class="v" style="color:var(--muted)">Paste a token to see claims.</span></div>`;stat("i","");return}
+    const parts=v.split(".");try{if(parts.length<2)throw 0;const h=JSON.parse(b64j(parts[0])),p=JSON.parse(b64j(parts[1]));
+      setVal("h",JSON.stringify(h,null,2));setVal("p",JSON.stringify(p,null,2));stat("i",`<b>${v.length}</b> chars · alg <b>${esc(h.alg||"?")}</b>`);
+      const L=[];const now=Date.now()/1000;
+      if(p.exp!=null)L.push(["EXPIRES",when(p.exp),p.exp<now?'<span class="badge bad">EXPIRED</span>':'<span class="badge">VALID</span>']);
+      if(p.iat!=null)L.push(["ISSUED",when(p.iat)]);if(p.nbf!=null)L.push(["NOT BEFORE",when(p.nbf),p.nbf>now?'<span class="badge warn">NOT YET</span>':""]);
+      ["iss","sub","aud","jti"].forEach(k=>{if(p[k]!=null)L.push([k.toUpperCase(),Array.isArray(p[k])?p[k].join(", "):String(p[k])])});
+      L.push(["SIGNATURE",parts[2]?parts[2].slice(0,40)+(parts[2].length>40?"…":""):"(none — unsigned)"]);rows($("claims"),L)}
+    catch(e){msg("i","Not a valid JWT.","bad");$("claims").innerHTML=""}}
+  bind("i",run);onclick("clear",()=>{setVal("i","");run()});onclick("ch",()=>copyText(getVal("h")));onclick("cp",()=>copyText(getVal("p")));
+  onclick("sample",()=>{const e=o=>btoa(JSON.stringify(o)).replace(/=+$/,"").replace(/\+/g,"-").replace(/\//g,"_");const n=Math.floor(Date.now()/1000);setVal("i",e({alg:"HS256",typ:"JWT"})+"."+e({sub:"1234567890",name:"Ada Lovelace",iss:"utilitybox",iat:n,exp:n+3600})+".c2lnbmF0dXJl");run()});run()}});
+
+/* JSON */
+TOOLS.push({id:"json",fill:1,ico:"{}",name:"JSON Formatter",desc:"Format, minify and validate JSON. Untick any key to drop it from the output.",
+render(){
+  const keysCard=`<section class="card" id="kCard"><div class="chead"><span class="label" id="kLabel">KEYS</span><div class="tools">${chip("kall","All")}${chip("knone","None")}</div></div><div style="padding:10px 14px 0"><input class="field" id="kq" placeholder="Filter keys…" style="width:100%;padding:7px 10px;font-size:12.5px" autocomplete="off" spellcheck="false"></div><div class="klist" id="klist"><div class="kempty">Keys from your JSON appear here.</div></div><div class="cfoot"><span id="kStat">Untick to remove from output</span></div></section>`;
+  $("main").innerHTML=head(this)+`<div class="stage k3">${pane("i","INPUT",{ph:'{"paste":"your JSON here"}',tools:chip("sample","Sample")+chip("clear","Clear")})}${pane("o","OUTPUT",{tools:chip("copy","Copy")}).replace("<textarea","<textarea readonly")}${keysCard}</div>
+  <div class="opts"><div class="tools">${chip("fmt","Format","on")}${chip("min","Minify")}</div><select class="field" id="ind" style="padding:7px 10px"><option value="2">2 spaces</option><option value="4">4 spaces</option><option value="t">Tab</option></select>${sw("sort","Sort keys")}</div>`;
+  let mode="fmt",sig="",paths=[];const off=new Set();
+  const sortK=o=>Array.isArray(o)?o.map(sortK):o&&typeof o==="object"?Object.keys(o).sort().reduce((a,k)=>(a[k]=sortK(o[k]),a),{}):o;
+  const join=(pre,k)=>pre?pre+"."+k:k;
+  function collect(o,pre,m){if(Array.isArray(o))o.forEach(x=>collect(x,pre+"[]",m));else if(o&&typeof o==="object")Object.keys(o).forEach(k=>{const p=join(pre,k);const e=m.get(p)||{p,k,d:p.split(".").length-1,n:0};e.n++;m.set(p,e);collect(o[k],p,m)})}
+  function strip(o,pre){if(Array.isArray(o))return o.map(x=>strip(x,pre+"[]"));if(o&&typeof o==="object"){const r={};Object.keys(o).forEach(k=>{const p=join(pre,k);if(!off.has(p))r[k]=strip(o[k],p)});return r}return o}
+  const hidden=p=>{for(const x of off){if(p!==x&&p.startsWith(x+".")||p.startsWith(x+"[]"))return true}return false};
+  function drawKeys(){const q=$("kq").value.trim().toLowerCase();const L=$("klist");
+    if(!paths.length){L.innerHTML='<div class="kempty">Keys from your JSON appear here.</div>';$("kLabel").textContent="KEYS";return}
+    L.innerHTML=paths.filter(e=>!q||e.p.toLowerCase().includes(q)).map(e=>`<label class="krow ${hidden(e.p)?"dim":""}" style="padding-left:${8+e.d*14}px" title="${esc(e.p)}"><input type="checkbox" data-p="${esc(e.p)}" ${off.has(e.p)?"":"checked"}><span class="kn">${esc(e.k)}</span>${e.n>1?`<span class="kc">×${e.n}</span>`:""}</label>`).join("")||'<div class="kempty">No keys match.</div>';
+    L.querySelectorAll("input").forEach(c=>c.onchange=()=>{c.checked?off.delete(c.dataset.p):off.add(c.dataset.p);run(true)});
+    $("kLabel").textContent=`KEYS · ${paths.filter(e=>!off.has(e.p)&&!hidden(e.p)).length}/${paths.length}`}
+  function run(keep){const v=getVal("i");msg("i","");
+    if(!v.trim()){setVal("o","");stat("i","");stat("o","");$("copy").disabled=true;paths=[];sig="";drawKeys();return}
+    try{let o=JSON.parse(v);
+      if(!keep){const m=new Map();collect(o,"",m);const np=[...m.values()],ns=np.map(e=>e.p+e.n).join("|");if(ns!==sig){sig=ns;paths=np;drawKeys()}}
+      o=strip(o,"");if($("sort").checked)o=sortK(o);const i=$("ind").value;const out=mode==="min"?JSON.stringify(o):JSON.stringify(o,null,i==="t"?"\t":+i);
+      setVal("o",out);msg("i","Valid JSON","good");stat("i",`<b>${v.length}</b> chars`);stat("o",`<b>${out.length}</b> chars${off.size?` · <b>${[...off].filter(p=>paths.some(e=>e.p===p)).length}</b> hidden`:""}`);$("copy").disabled=false;if(keep)drawKeys()}
+    catch(e){let m=e.message,pos=(m.match(/position (\d+)/)||[])[1];if(pos!=null){const b=v.slice(0,+pos).split("\n");m=`Line ${b.length}, column ${b[b.length-1].length+1} — ${m.replace(/ in JSON.*/,"")}`}msg("i",m,"bad");setVal("o","");$("copy").disabled=true}}
+  bind("i",()=>run());bind("kq",drawKeys);["sort","ind"].forEach(i=>$(i).onchange=()=>run(true));
+  [["fmt","fmt"],["min","min"]].forEach(([id,m])=>$(id).onclick=()=>{mode=m;$("fmt").classList.toggle("on",m==="fmt");$("min").classList.toggle("on",m==="min");run(true)});
+  onclick("kall",()=>{off.clear();run(true)});onclick("knone",()=>{paths.filter(e=>e.d===0).forEach(e=>off.add(e.p));run(true)});
+  onclick("clear",()=>{setVal("i","");off.clear();run();$("i").focus()});onclick("copy",()=>copyText(getVal("o")));
+  onclick("sample",()=>{off.clear();setVal("i",'{"name":"UtilityBox","tools":[{"id":"base64","free":true},{"id":"jwt","free":true}],"meta":{"free":true,"version":1.2,"author":{"name":"Atul","site":"stackline.space"}}}');run()});run()}});
+
+/* Hash */
+TOOLS.push({id:"hash",ico:"#",name:"Hash Generator",desc:"SHA-1, SHA-256, SHA-384 and SHA-512 digests of your text — computed in-browser.",
+render(){
+  $("main").innerHTML=head(this)+`<div class="stack">${pane("i","TEXT",{ph:"Type text to hash…",tools:chip("clear","Clear")})}<div class="card"><div class="chead"><span class="label">DIGESTS</span><div class="tools">${sw("up","UPPERCASE")}</div></div><div class="rows" id="hr" style="margin-top:12px"></div></div></div>`;
+  const A=[["SHA-1","SHA-1"],["SHA-256","SHA-256"],["SHA-384","SHA-384"],["SHA-512","SHA-512"]];let tok=0;
+  async function run(){const v=getVal("i"),t=++tok;stat("i",`<b>${v.length}</b> chars · ${fmtB(new TextEncoder().encode(v).length)}`);
+    if(!crypto.subtle){$("hr").innerHTML=`<div class="row"><span class="v">Hashing needs a secure (https / localhost) page.</span></div>`;return}
+    const res=await Promise.all(A.map(async([n,a])=>{const h=new Uint8Array(await crypto.subtle.digest(a,new TextEncoder().encode(v)));let x=[...h].map(b=>b.toString(16).padStart(2,"0")).join("");return [n,$("up").checked?x.toUpperCase():x]}));
+    if(t===tok)rows($("hr"),res)}
+  bind("i",run);$("up").onchange=run;onclick("clear",()=>{setVal("i","");run();$("i").focus()});run()}});
+
+/* UUID */
+TOOLS.push({id:"uuid",ico:"ID",name:"UUID Generator",desc:"Generate random v4 UUIDs in bulk, with format options.",
+render(){
+  $("main").innerHTML=head(this)+`<div class="stack">${pane("o","UUIDS",{ro:1,tools:chip("gen","↻ Generate","on")+chip("copy","Copy all")})}</div>
+  <div class="opts"><label style="display:flex;gap:9px;align-items:center">Count <input class="field" id="n" type="number" min="1" max="100" value="5" style="width:80px;padding:7px 10px"></label>${sw("up","Uppercase")}${sw("hy","Hyphens",1)}${sw("br","Braces")}</div>`;
+  const v4=()=>crypto.randomUUID?crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=crypto.getRandomValues(new Uint8Array(1))[0]&15;return (c==="x"?r:(r&3|8)).toString(16)});
+  function run(){const n=Math.min(100,Math.max(1,+$("n").value||1));const L=Array.from({length:n},()=>{let u=v4();if(!$("hy").checked)u=u.replace(/-/g,"");if($("up").checked)u=u.toUpperCase();if($("br").checked)u="{"+u+"}";return u});
+    setVal("o",L.join("\n"));stat("o",`<b>${n}</b> generated`)}
+  onclick("gen",run);onclick("copy",()=>copyText(getVal("o")));["up","hy","br","n"].forEach(i=>$(i).addEventListener("change",run));run()}});
+
+/* Regex */
+TOOLS.push({id:"regex",ico:".*",name:"Regex Tester",desc:"Test regular expressions with live highlighting and capture groups.",
+render(){
+  $("main").innerHTML=head(this)+`<div class="card"><div class="pad" style="display:flex;gap:10px"><input class="field" id="re" style="flex:1" placeholder="Pattern, e.g. (\\w+)@(\\w+)\\.com" autocomplete="off" spellcheck="false"><input class="field" id="fl" value="g" style="width:90px" placeholder="flags" spellcheck="false"></div><div class="cfoot" style="border-top:0;padding-top:0"><span id="reStat"></span><span class="msg" id="reMsg"></span></div></div>
+  <div class="stage two" style="margin-top:14px">${pane("i","TEST STRING",{ph:"Text to test against…",tools:chip("clear","Clear")})}<section class="card"><div class="chead"><span class="label">MATCHES</span></div><div class="out hl" id="hl" style="min-height:120px;flex:none;max-height:200px"></div><div class="rows" id="mrows" style="border-top:1px solid var(--line);max-height:220px;overflow:auto"></div></section></div>`;
+  function run(){const p=$("re").value,t=getVal("i");$("reMsg").textContent="";$("reMsg").className="msg";$("hl").innerHTML=esc(t);$("mrows").innerHTML="";stat("i",`<b>${t.length}</b> chars`);if(!p){$("reStat").textContent="";return}
+    let r;try{r=new RegExp(p,$("fl").value)}catch(e){$("reMsg").textContent=e.message.replace(/^Invalid regular expression: /,"");$("reMsg").className="msg bad";return}
+    const all=[];let m;if(r.global){r.lastIndex=0;while((m=r.exec(t))&&all.length<500){all.push(m);if(m[0]==="")r.lastIndex++}}else{m=r.exec(t);if(m)all.push(m)}
+    $("reStat").innerHTML=`<b>${all.length}</b> match${all.length===1?"":"es"}`;let out="",last=0;all.forEach(m=>{if(!m[0])return;out+=esc(t.slice(last,m.index))+"<mark>"+esc(m[0])+"</mark>";last=m.index+m[0].length});$("hl").innerHTML=out+esc(t.slice(last));
+    rows($("mrows"),all.slice(0,100).flatMap((m,i)=>[["#"+(i+1)+" @"+m.index,m[0]],...m.slice(1).map((g,j)=>["  GROUP "+(j+1),g==null?"(undefined)":g])]))}
+  bind("re",run);bind("fl",run);bind("i",run);onclick("clear",()=>{setVal("i","");run()});run()}});
+
+/* ---------- Router ---------- */
+function mount(){const id=(location.hash||"#base64").slice(1);const t=TOOLS.find(x=>x.id===id)||TOOLS[0];cleanup();cleanup=()=>{};
+  $("nav").innerHTML=TOOLS.map(x=>`<a href="#${x.id}" class="${x===t?"on":""}"><i>${x.ico}</i>${x.name}</a>`).join("");
+  $("main").classList.toggle("fill",!!t.fill);t.render();document.title=t.name+" — Dev Tools";localStorage.setItem("devtools_last",t.id)}
+addEventListener("hashchange",()=>{mount();scrollTo({top:0})});
+if(!location.hash){const l=localStorage.getItem("devtools_last");if(l&&TOOLS.some(x=>x.id===l))history.replaceState(null,"","#"+l)}
+mount();
+</script></body></html>
