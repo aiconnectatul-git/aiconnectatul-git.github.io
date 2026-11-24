@@ -77,6 +77,11 @@ input{padding-right:54px}textarea{resize:vertical;min-height:150px;line-height:1
           <input id="secret" type="password" autocomplete="off" spellcheck="false" placeholder="Enter your top-level secret">
           <button class="eye" type="button" onclick="toggleSecret()" aria-label="Show or hide secret">◉</button>
         </div>
+        <div id="link-box" style="display:none;margin-top:10px;padding:10px 12px;border:1px dashed currentColor;border-radius:10px;font-size:13px;opacity:.9">
+          <div style="margin-bottom:8px">No <code>masterpass</code> in the URL. Type your secret above, then save an auto-fill link to bookmark.</div>
+          <button type="button" class="copy" onclick="saveLink()">Save auto-fill URL</button>
+          <div id="link-out" style="margin-top:8px;word-break:break-all;user-select:all"></div>
+        </div>
       </div>
       <div class="field">
         <div class="field-head"><label id="text-label" for="source">ENCRYPTED TEXT TO DECRYPT</label><span class="hint" id="text-hint">Paste the complete CipherPop encrypted string</span></div>
@@ -110,6 +115,11 @@ function showHow(){alert('1. Enter a strong common secret. 2. Encrypt your text.
 function showSecurity(){alert('CipherPop uses the browser Web Crypto API: AES-256-GCM with a key derived using PBKDF2-SHA-256 (600,000 iterations). No network requests are made by the app. Use a strong, unique secret and keep a backup. Anyone who knows the secret can decrypt your data.')}
 function toggleTheme(){document.body.classList.toggle('dark');if(document.body.classList.contains('dark')){document.documentElement.style.setProperty('--bg','#171a24');document.documentElement.style.setProperty('--panel','#222634');document.documentElement.style.setProperty('--ink','#f1f3fa');document.documentElement.style.setProperty('--muted','#a3aabd');document.documentElement.style.setProperty('--line','#3a4052');document.documentElement.style.setProperty('--shadow','0 12px 34px rgba(0,0,0,.18)')}else{['--bg','--panel','--ink','--muted','--line','--shadow'].forEach((p,i)=>document.documentElement.style.removeProperty(p))}}
 function downloadApp(){const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cipherpop.html';a.click();URL.revokeObjectURL(a.href)}
+
+function utf8ToB64(t){return b64(enc.encode(t))}
+function b64ToUtf8(v){v=v.trim().replace(/ /g,'+').replace(/-/g,'+').replace(/_/g,'/');while(v.length%4)v+='=';return dec.decode(unb64(v))}
+function saveLink(){const v=document.getElementById('secret').value;if(!v){toast('Enter your secret key first.');document.getElementById('secret').focus();return}const u=new URL(location.href);u.search='';u.hash='';const link=u.toString()+'?masterpass='+encodeURIComponent(utf8ToB64(v));document.getElementById('link-out').textContent=link;try{history.replaceState(null,'',link)}catch(e){}navigator.clipboard?.writeText(link).then(()=>toast('Link copied. Bookmark this page.'),()=>toast('Link ready. Bookmark this page.'))}
+(function initMasterpass(){const raw=new URLSearchParams(location.search).get('masterpass');if(raw&&raw.trim()){try{document.getElementById('secret').value=b64ToUtf8(raw);return}catch(e){toast('masterpass in URL is not valid base64.')}}document.getElementById('link-box').style.display='block'})();
 </script>
 </body>
 </html>
