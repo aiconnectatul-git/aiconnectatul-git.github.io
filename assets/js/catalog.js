@@ -11,10 +11,5 @@ window.TOOL_CATALOG = [
       { name:"CipherPop", description:"Encrypt and decrypt text privately in your browser", path:"apps/developer/cipherpop/index.html", tags:["encryption","cipher","privacy","security"] },
       { name:"Base64 Encode & Decode", description:"Convert text and files to and from Base64", path:"apps/developer/base64/index.html", tags:["base64","encode","decode","data"] }
     ]}
-  ]},
-  { id:"daily", name:"Daily Utilities", description:"Handy tools for everyday tasks", icon:"◷", subcategories:[
-    { name:"Shopping", tools:[
-      { name:"Indian Grocery Shopping List Wizard", description:"Build and save a categorized Indian grocery shopping list", path:"apps/daily/grocery-list/index.html", tags:["shopping","grocery","ration","list"] }
-    ]}
   ]}
 ];
