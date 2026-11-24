@@ -889,11 +889,11 @@
       </div>
 
       <div class="header-actions">
-        <button type="button" class="btn-ghost-light" id="btnResetTrigger" title="Clear all quantities">
+        <button type="button" class="btn-ghost-light" id="btnResetTrigger" title="Start over with a fresh list">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
           </svg>
-          Reset
+          Restart
         </button>
         <button type="button" class="cart-pill" id="btnTopReview">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
@@ -947,11 +947,11 @@
   <!-- Custom Reset Confirmation Modal -->
   <div class="modal-backdrop" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-box">
-      <h3 id="modalTitle">Clear entire grocery list?</h3>
-      <p>This will remove all entered quantities and custom brand names across all categories.</p>
+      <h3 id="modalTitle">Restart with a fresh list?</h3>
+      <p>This clears your saved list from this browser: all quantities, custom brands and custom items. This can't be undone.</p>
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" id="btnCancelReset">Cancel</button>
-        <button type="button" class="btn btn-danger-outline" id="btnConfirmReset">Yes, Clear All</button>
+        <button type="button" class="btn btn-danger-outline" id="btnConfirmReset">Yes, Restart</button>
       </div>
     </div>
   </div>
@@ -2673,12 +2673,17 @@
     state.searchQuery = "";
     resetModal.classList.remove("open");
     renderApp();
-    showToast("All selections cleared.");
+    // renderApp() re-saves the (now empty) state, so wipe the cache afterwards.
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    window.scrollTo({ top: 0 });
+    showToast("Started a fresh list.");
   });
 
   // Initialize App
   loadState();
+  const resumed = getTotalSelectedCount() > 0;
   renderApp();
+  if (resumed) showToast("Welcome back \u2014 your list was restored.");
 })();
 </script>
 </body>
