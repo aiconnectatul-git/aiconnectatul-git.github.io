@@ -1,6 +1,14 @@
 const catalog=document.getElementById("catalog"),search=document.getElementById("search"),empty=document.getElementById("empty");
 const allTools=()=>window.TOOL_CATALOG.flatMap(c=>c.subcategories.flatMap(s=>s.tools.map(t=>({...t,category:c.name,subcategory:s.name,categoryId:c.id}))));
-function render(){const q=search.value.trim().toLowerCase();let shown=0,html="";window.TOOL_CATALOG.forEach(cat=>{let subs="";let count=0;cat.subcategories.forEach(sub=>{const tools=sub.tools.filter(t=>[t.name,t.description,sub.name,cat.name,...(t.tags||[])].join(" ").toLowerCase().includes(q));if(!tools.length)return;count+=tools.length;subs+=`<div class="subcategory"><div class="subcategory-title">${sub.name.toUpperCase()}</div><div class="tool-list">${tools.map(t=>`<a class="tool-link" href="${t.path}"><span>${t.name}</span><span class="arrow">↗</span></a>`).join("")}</div></div>`});if(!count)return;shown+=count;html+=`<article class="category-card"><div class="category-top"><div class="category-icon">${cat.icon}</div><div><h3>${cat.name}</h3><p>${cat.description}</p></div><span class="tool-count">${count} TOOLS</span></div>${subs}</article>`});catalog.innerHTML=html;empty.classList.toggle("hidden",shown!==0);}
+function render(){const q=search.value.trim().toLowerCase();let shown=0,html="";
+  const hit=(t,sub,cat)=>!q||[t.name,t.description,sub.name,cat.name,...(t.tags||[])].join(" ").toLowerCase().includes(q);
+  window.TOOL_CATALOG.forEach(cat=>{
+    const matches=cat.subcategories.reduce((n,sub)=>n+sub.tools.filter(t=>hit(t,sub,cat)).length,0);if(!matches)return;shown+=matches;
+    // a matching category shows ALL of its tools; the ones that matched are highlighted
+    const total=cat.subcategories.reduce((n,sub)=>n+sub.tools.length,0);
+    const subs=cat.subcategories.map(sub=>`<div class="subcategory"><div class="subcategory-title">${sub.name.toUpperCase()}</div><div class="tool-list">${sub.tools.map(t=>`<a class="tool-link ${q&&hit(t,sub,cat)?"hit":q?"dim":""}" href="${t.path}"><span>${t.name}</span><span class="arrow">↗</span></a>`).join("")}</div></div>`).join("");
+    html+=`<article class="category-card"><div class="category-top"><div class="category-icon">${cat.icon}</div><div><h3>${cat.name}</h3><p>${cat.description}</p></div><span class="tool-count">${q?`${matches} OF ${total} MATCH`:`${total} TOOLS`}</span></div>${subs}</article>`});
+  catalog.innerHTML=html;empty.classList.toggle("hidden",shown!==0)}
 search.addEventListener("input",render);
 document.getElementById("quick-row").innerHTML=window.TOOL_CATALOG.map(c=>`<button class="quick-chip" data-category="${c.id}">${c.icon} &nbsp;${c.name}</button>`).join("");
 document.querySelectorAll(".quick-chip").forEach(b=>b.addEventListener("click",()=>{search.value=b.textContent.trim().replace(/^[^A-Za-z0-9]+/,"");render();document.getElementById("categories").scrollIntoView({behavior:"smooth"})}));
