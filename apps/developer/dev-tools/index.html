@@ -98,20 +98,46 @@ body:has(.main.fill){padding-bottom:18px}
 .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--mint);color:#0b1f1a;font-weight:700;font-size:13px;padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:.25s;z-index:9}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media(max-width:860px){
-  .app{grid-template-columns:minmax(0,1fr);gap:16px}.side{min-width:0}
-  .side{position:static;padding:10px;border-radius:18px}.brand{display:none}
-  .nav{flex-direction:row;overflow-x:auto;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
-  .nav a{white-space:nowrap;padding:8px 12px}.nav a i{display:none}
   .stage,.stage.two{grid-template-columns:minmax(0,1fr)}.mid{justify-content:center;margin:-4px 0}.swap{transform:rotate(90deg)}.swap:hover{transform:rotate(270deg)}
   textarea,.out{min-height:190px}.hint{display:none}.grid2{grid-template-columns:minmax(0,1fr)}
   .row{flex-wrap:wrap;gap:4px}.row .k{width:100%}
   textarea,.field{font-size:16px}
 }
+/* ---- Shell: slim top bar + slide-out drawer navigation ---- */
+body{padding:0 0 40px}
+.bar{position:sticky;top:0;z-index:15;height:58px;display:flex;align-items:center;gap:12px;padding:0 20px;background:#0b1220d9;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.burger{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:#ffffff08;color:var(--text);display:grid;place-items:center;cursor:pointer;flex-shrink:0;transition:.15s}
+.burger:hover{border-color:#8ce4c066;color:var(--mint)}
+.bar .mark{width:32px;height:32px;border-radius:10px;font-size:12px;flex-shrink:0}
+.crumb{display:flex;align-items:baseline;gap:9px;min-width:0;flex:1}
+.crumb small{color:var(--muted);font-weight:600;font-size:13px;white-space:nowrap}
+.crumb .sep{color:#3d4d66}
+.crumb b{font:700 17px "Space Grotesk";letter-spacing:-.4px;white-space:nowrap}
+.crumb .d{color:#5d6e86;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-left:6px}
+.bar .back{white-space:nowrap;flex-shrink:0}
+.wrap{max-width:1440px;margin:0 auto;padding:18px 20px 0}
+.app{display:block;margin:0}
+.side{position:fixed;top:0;left:0;bottom:0;width:280px;z-index:30;border-radius:0 22px 22px 0;border-left:0;transform:translateX(-105%);transition:transform .28s cubic-bezier(.4,.1,.2,1);overflow:auto;padding:16px 14px;visibility:hidden}
+.side.open{transform:none;visibility:visible;box-shadow:24px 0 60px #0009}
+.side .brand{display:flex}
+.side .nav{flex-direction:column;overflow:visible}.side .nav a{white-space:normal;padding:10px 11px}.side .nav a i{display:grid}
+.scrim{position:fixed;inset:0;background:#05090fa8;z-index:25;opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.open{opacity:1;pointer-events:auto}
+.tbar{display:flex;justify-content:flex-end;margin-bottom:14px;flex:none}
+.main.fill{height:calc(100vh - 58px - 36px)}
+@media(max-width:860px){.crumb small,.crumb .sep,.crumb .d{display:none}.bar{padding:0 14px}.wrap{padding:14px 14px 0}.main.fill{height:auto}}
 </style></head>
-<body><div class="wrap">
-<a class="back" href="../../../index.html">← Back to tools</a>
+<body>
+<header class="bar">
+  <button class="burger" id="burger" aria-label="Open tools menu" aria-expanded="false" aria-controls="side"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <div class="mark">&lt;/&gt;</div>
+  <div class="crumb"><small>Dev Tools</small><span class="sep">/</span><b id="tName"></b><span class="d" id="tDesc"></span></div>
+  <a class="back" href="../../../index.html">← All tools</a>
+</header>
+<div class="scrim" id="scrim"></div>
+<div class="wrap">
 <div class="app">
-  <aside class="side">
+  <aside class="side" id="side">
     <div class="brand"><div class="mark">&lt;/&gt;</div><div><small>DEVELOPER</small><b>Dev Tools</b></div></div>
     <nav class="nav" id="nav"></nav>
   </aside>
@@ -131,7 +157,7 @@ const chip=(id,label,cls="")=>`<button class="chip ${cls}" id="${id}">${label}</
 const pane=(id,label,o={})=>`<section class="card" id="${id}Card"><div class="chead"><span class="label" id="${id}Label">${label}</span><div class="tools">${o.tools||""}</div></div>${o.ro?`<div class="out ro" id="${id}"></div>`:`<textarea id="${id}" spellcheck="false" placeholder="${o.ph||""}"></textarea>`}<div class="cfoot"><span id="${id}Stat"></span><span class="msg" id="${id}Msg"></span></div></section>`;
 const seg=(a,b,v=0)=>`<div class="seg" id="seg" data-v="${v}"><i></i><button data-v="0" aria-selected="${v==0}">${a}</button><button data-v="1" aria-selected="${v==1}">${b}</button></div>`;
 const sw=(id,label,on)=>`<label class="sw"><input type="checkbox" id="${id}" ${on?"checked":""}><span></span>${label}</label>`;
-const head=t=>`<div class="thead"><div><div class="kicker">DEV TOOLS</div><h1>${t.name}</h1><p class="desc">${t.desc}</p></div>${t.head?t.head:""}</div>`;
+const head=t=>t.head?`<div class="tbar">${t.head}</div>`:"";
 const setVal=(id,v)=>{const e=$(id);if("value" in e)e.value=v;else e.textContent=v};
 const getVal=id=>{const e=$(id);return "value" in e?e.value:e.textContent};
 const stat=(id,h)=>$(id+"Stat").innerHTML=h;
@@ -362,7 +388,12 @@ render(){
 /* ---------- Router ---------- */
 function mount(){const id=(location.hash||"#base64").slice(1);const t=TOOLS.find(x=>x.id===id)||TOOLS[0];cleanup();cleanup=()=>{};
   $("nav").innerHTML=TOOLS.map(x=>`<a href="#${x.id}" class="${x===t?"on":""}"><i>${esc(x.ico)}</i>${x.name}</a>`).join("");
+  $("tName").textContent=t.name;$("tDesc").textContent=t.desc;setDrawer(false);
   $("main").classList.toggle("fill",!!t.fill);t.render();document.title=t.name+" — Dev Tools";localStorage.setItem("devtools_last",t.id)}
+function setDrawer(o){$("side").classList.toggle("open",o);$("scrim").classList.toggle("open",o);$("burger").setAttribute("aria-expanded",o);if(o)setTimeout(()=>{const a=$("nav").querySelector("a.on")||$("nav").querySelector("a");a&&a.focus()},50)}
+$("burger").onclick=()=>setDrawer(!$("side").classList.contains("open"));$("scrim").onclick=()=>setDrawer(false);
+addEventListener("keydown",e=>{if(e.key==="Escape"&&$("side").classList.contains("open")){setDrawer(false);$("burger").focus()}});
+$("nav").addEventListener("click",e=>{if(e.target.closest("a"))setDrawer(false)});
 addEventListener("hashchange",()=>{mount();scrollTo({top:0})});
 if(!location.hash){const l=localStorage.getItem("devtools_last");if(l&&TOOLS.some(x=>x.id===l))history.replaceState(null,"","#"+l)}
 mount();

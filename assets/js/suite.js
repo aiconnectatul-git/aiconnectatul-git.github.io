@@ -53,14 +53,14 @@ function fieldHTML(f,val){
 function Suite(cfg){
   const T=cfg.tools;let leave=[];
   const ctx={onLeave:fn=>leave.push(fn)};
-  document.body.innerHTML=`<div class="wrap"><a class="back" href="../../index.html">← Back to tools</a><div class="app"><aside class="side"><div class="brand"><div class="mark">${cfg.ico}</div><div><small>${cfg.kicker}</small><b>${cfg.name}</b></div></div><nav class="nav" id="nav"></nav></aside><main class="main" id="main"></main></div></div><div class="toast" id="toast"></div>`;
+  document.body.innerHTML=`<header class="bar"><button class="burger" id="burger" aria-label="Open tools menu" aria-expanded="false" aria-controls="side"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="mark">${cfg.ico}</div><div class="crumb"><small>${cfg.name}</small><span class="sep">/</span><b id="tName"></b><span class="d" id="tDesc"></span></div><a class="back" href="../../index.html">← All tools</a></header><div class="scrim" id="scrim"></div><div class="wrap"><div class="app"><aside class="side" id="side"><div class="brand"><div class="mark">${cfg.ico}</div><div><small>${cfg.kicker}</small><b>${cfg.name}</b></div></div><nav class="nav" id="nav"></nav></aside><main class="main" id="main"></main></div></div><div class="toast" id="toast"></div>`;
   const key=t=>`suite:${cfg.slug}:${t.id}`;
   function mount(){
     const id=(location.hash||"#"+T[0].id).slice(1);const t=T.find(x=>x.id===id)||T[0];
     leave.forEach(f=>{try{f()}catch(e){}});leave=[];
     $("nav").innerHTML=T.map(x=>`<a href="#${x.id}" class="${x===t?"on":""}"><i>${esc(x.ico)}</i>${x.name}</a>`).join("");
     document.title=`${t.name} — ${cfg.name}`;localStorage.setItem(`suite:${cfg.slug}:last`,t.id);
-    const head=`<div class="thead"><div class="kicker">${cfg.name.toUpperCase()}</div><h1>${t.name}</h1><p class="desc">${t.desc}</p></div>`;
+    const head="";$("tName").textContent=t.name;$("tDesc").textContent=t.desc;setDrawer(false);
     if(t.render){$("main").innerHTML=head;t.render($("main"),ctx);return}
     let saved={};try{saved=JSON.parse(localStorage.getItem(key(t))||"{}")}catch(e){}
     const F=t.fields.filter(f=>!f.group);
@@ -87,6 +87,10 @@ function Suite(cfg){
   document.addEventListener("click",e=>{
     const r=e.target.closest(".row[data-v]");if(r){copyText(r.dataset.v);return}
     const c=e.target.closest(".js-copy");if(c){const p=c.closest(".card").querySelector(".outtext");if(p)copyText(p.textContent)}});
+  function setDrawer(o){$("side").classList.toggle("open",o);$("scrim").classList.toggle("open",o);$("burger").setAttribute("aria-expanded",o);if(o)setTimeout(()=>{const a=$("nav").querySelector("a.on")||$("nav").querySelector("a");a&&a.focus()},50)}
+  $("burger").onclick=()=>setDrawer(!$("side").classList.contains("open"));$("scrim").onclick=()=>setDrawer(false);
+  addEventListener("keydown",e=>{if(e.key==="Escape"&&$("side").classList.contains("open")){setDrawer(false);$("burger").focus()}});
+  $("nav").addEventListener("click",e=>{if(e.target.closest("a"))setDrawer(false)});
   addEventListener("hashchange",()=>{mount();scrollTo({top:0})});
   if(!location.hash){const l=localStorage.getItem(`suite:${cfg.slug}:last`);if(l&&T.some(x=>x.id===l))history.replaceState(null,"","#"+l)}
   mount();
