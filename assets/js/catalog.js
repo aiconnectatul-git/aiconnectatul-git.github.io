@@ -1,6 +1,11 @@
 // Add new tools here. Paths are relative to the website root; "#id" deep-links into a tool inside a suite page.
 const T=(name,description,path,tags=[])=>({name,description,path,tags});
 window.TOOL_CATALOG = [
+  { id:"home", name:"Home", description:"Everyday helpers for the household", icon:"⌂", subcategories:[
+    { name:"Household", tools:[
+      T("Grocery List Wizard","Build a categorised Indian grocery list","apps/daily/grocery-list/index.html",["grocery","shopping","ration","list","kirana"]),
+      T("Panchang","Live tithi, nakshatra, Rahu Kaal and 2026 festivals","apps/panchang/index.html",["panchang","tithi","nakshatra","rahu kaal","festival","hindu calendar","muhurat"])]}
+  ]},
   { id:"finance", name:"Finance", description:"Loans, investments and everyday money maths", icon:"₹", subcategories:[
     { name:"Loans", tools:[
       T("Loan / EMI Calculator","Monthly EMI, total interest and amortization","apps/finance/index.html#emi",["loan","emi","home loan","car loan","prepayment","interest"]),

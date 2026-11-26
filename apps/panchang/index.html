@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>पंचांग · Panchang</title>
+<meta name="description" content="Live Hindu Panchang and festival calendar for 2026">
+<meta name="theme-color" content="#171331">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Panchang">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23171331'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%23C9A227' stroke-width='3'/%3E%3Cpath d='M50 26 v10 M50 64 v10 M26 50 h10 M64 50 h10' stroke='%23E8871E' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='50' r='9' fill='%23E8871E'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23171331'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%23C9A227' stroke-width='3'/%3E%3Ccircle cx='50' cy='50' r='9' fill='%23E8871E'/%3E%3C/svg%3E">
+<link rel="manifest" href='data:application/manifest+json,{"name":"Panchang%20%E2%80%94%20Hindu%20Calendar","short_name":"Panchang","start_url":".","display":"standalone","background_color":"%23171331","theme_color":"%23171331","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%23171331%27/%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2730%27 fill=%27none%27 stroke=%27%23C9A227%27 stroke-width=%273%27/%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%279%27 fill=%27%23E8871E%27/%3E%3C/svg%3E","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}'>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Mukta:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#171331; --bg-panel:#221c42; --bg-panel2:#2a2350;
+    --gold:#C9A227; --marigold:#E8871E; --vermilion:#C0392B;
+    --ivory:#F6EFE3; --muted:#B6AEDC; --line:rgba(201,162,39,.22);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, #2a2058 0%, transparent 45%),
+      radial-gradient(circle at 100% 25%, #3a1f45 0%, transparent 40%),
+      var(--bg-deep);
+    color:var(--ivory);
+    font-family:'Mukta',sans-serif;
+    min-height:100vh;
+    padding-bottom:48px;
+  }
+  h1,h2,h3,.display{font-family:'Yatra One',cursive; font-weight:400; letter-spacing:.3px;}
+  a{color:var(--marigold);}
+
+  /* ---------- header ---------- */
+  header{
+    padding:28px 20px 18px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  header::before{
+    content:'';
+    position:absolute; inset:0;
+    background-image:radial-gradient(circle, var(--gold) 0.5px, transparent 0.5px);
+    background-size:18px 18px;
+    opacity:.10;
+    pointer-events:none;
+  }
+  .devanagari-title{font-size:2.1rem; color:var(--gold); margin:0 0 2px;}
+  .sub-title{font-size:.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:2px; margin:0;}
+  .today-date{margin-top:14px; font-size:1.05rem; color:var(--ivory);}
+  .today-date .hindu-date{display:block; font-size:.85rem; color:var(--marigold); margin-top:3px;}
+
+  /* ---------- panchang hero card ---------- */
+  .wrap{max-width:560px; margin:0 auto; padding:0 16px;}
+  .card{
+    background:linear-gradient(160deg, var(--bg-panel2), var(--bg-panel));
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:22px 20px;
+    margin-top:18px;
+    position:relative;
+  }
+  .hero-top{display:flex; align-items:center; gap:16px;}
+  .moon-emoji{font-size:3.1rem; line-height:1; filter:drop-shadow(0 0 10px rgba(232,135,30,.35));}
+  .hero-tithi{flex:1;}
+  .hero-tithi .tithi-name{font-family:'Yatra One',cursive; font-size:1.55rem; color:var(--ivory); margin:0;}
+  .hero-tithi .paksha-label{font-size:.85rem; color:var(--marigold); margin-top:2px;}
+  .live-dot{display:inline-block; width:7px; height:7px; border-radius:50%; background:#6be675; margin-right:6px; box-shadow:0 0 6px #6be675; animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .live-tag{font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-top:10px;}
+
+  .panch-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px;
+    margin-top:18px;
+  }
+  .panch-item{
+    background:rgba(0,0,0,.18);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 12px;
+  }
+  .panch-item .label{font-size:.68rem; text-transform:uppercase; letter-spacing:1.2px; color:var(--muted);}
+  .panch-item .value{font-size:1rem; margin-top:3px; color:var(--ivory); font-weight:600;}
+
+  .sun-row{display:flex; justify-content:space-between; margin-top:12px; font-size:.9rem; color:var(--muted);}
+  .sun-row b{color:var(--ivory); font-weight:600;}
+  .rahu-note{margin-top:10px; font-size:.82rem; color:var(--muted); background:rgba(192,57,43,.12); border:1px solid rgba(192,57,43,.35); border-radius:10px; padding:8px 11px;}
+  .rahu-note b{color:#e88b83;}
+
+  .loc-row{display:flex; align-items:center; justify-content:space-between; margin-top:14px; font-size:.8rem; color:var(--muted);}
+  .loc-row button{
+    background:none; border:1px solid var(--line); color:var(--gold);
+    border-radius:20px; padding:5px 12px; font-size:.75rem; font-family:inherit; cursor:pointer;
+  }
+
+  /* ---------- 7 day strip ---------- */
+  .strip-title{margin:26px 4px 10px; font-size:1.05rem; color:var(--gold);}
+  .strip{display:flex; gap:9px; overflow-x:auto; padding:2px 2px 8px;}
+  .strip::-webkit-scrollbar{height:5px;}
+  .strip::-webkit-scrollbar-thumb{background:var(--line); border-radius:4px;}
+  .strip .day{
+    flex:0 0 auto; width:84px; background:var(--bg-panel);
+    border:1px solid var(--line); border-radius:14px; padding:10px 8px; text-align:center;
+  }
+  .strip .day.today{border-color:var(--marigold); background:linear-gradient(160deg,var(--bg-panel2),var(--bg-panel));}
+  .strip .day .dow{font-size:.68rem; color:var(--muted); text-transform:uppercase;}
+  .strip .day .dnum{font-size:1.1rem; font-weight:600; margin:2px 0;}
+  .strip .day .tname{font-size:.7rem; color:var(--marigold); line-height:1.25;}
+
+  /* ---------- festivals ---------- */
+  .section-title{margin:30px 4px 6px; font-size:1.3rem; color:var(--gold); display:flex; align-items:baseline; justify-content:space-between;}
+  .section-title span.yr{font-size:.75rem; color:var(--muted); font-family:'Mukta',sans-serif;}
+  .filters{display:flex; gap:8px; margin:10px 4px 14px; flex-wrap:wrap;}
+  .filters button{
+    background:var(--bg-panel); border:1px solid var(--line); color:var(--muted);
+    border-radius:20px; padding:6px 14px; font-size:.78rem; font-family:inherit; cursor:pointer;
+  }
+  .filters button.active{background:var(--marigold); color:#221100; border-color:var(--marigold); font-weight:600;}
+
+  .fest-list{display:flex; flex-direction:column; gap:10px;}
+  .fest-item{
+    display:flex; gap:14px; align-items:center;
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px;
+  }
+  .fest-item.next{border-color:var(--marigold); background:linear-gradient(150deg,rgba(232,135,30,.14),var(--bg-panel));}
+  .fest-date{
+    flex:0 0 54px; text-align:center; background:rgba(0,0,0,.22); border-radius:10px; padding:7px 0;
+  }
+  .fest-date .d{font-size:1.15rem; font-weight:700; line-height:1;}
+  .fest-date .m{font-size:.65rem; text-transform:uppercase; color:var(--muted); letter-spacing:1px;}
+  .fest-info{flex:1;}
+  .fest-info .name{font-weight:600; font-size:.98rem;}
+  .fest-info .note{font-size:.8rem; color:var(--muted); margin-top:1px;}
+  .fest-badge{font-size:.68rem; color:var(--marigold); white-space:nowrap; font-weight:600;}
+
+  /* ---------- install ---------- */
+  .install-card{
+    margin-top:32px; background:var(--bg-panel); border:1px solid var(--line);
+    border-radius:16px; padding:18px 18px 6px;
+  }
+  .install-card h3{margin:0 0 4px; color:var(--gold); font-size:1.15rem;}
+  .install-card p.lead{color:var(--muted); font-size:.85rem; margin-top:0;}
+  .install-btn{
+    width:100%; background:var(--marigold); color:#221100; border:none; border-radius:12px;
+    padding:13px; font-size:.95rem; font-weight:700; font-family:inherit; cursor:pointer; margin:6px 0 16px;
+  }
+  details{border-top:1px solid var(--line); padding:12px 0;}
+  details summary{cursor:pointer; font-weight:600; font-size:.88rem; color:var(--ivory);}
+  details ol{margin:10px 0 4px; padding-left:20px; color:var(--muted); font-size:.85rem; line-height:1.7;}
+  details ol b{color:var(--ivory);}
+
+  footer{text-align:center; margin-top:34px; padding:0 24px; font-size:.72rem; color:var(--muted); line-height:1.6;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 class="devanagari-title">पंचांग</h1>
+  <p class="sub-title">Hindu Panchang &amp; Festival Calendar</p>
+  <div class="today-date" id="todayDate">—
+    <span class="hindu-date" id="hinduDate"></span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- Today's panchang -->
+  <div class="card" id="panchangCard">
+    <div class="hero-top">
+      <div class="moon-emoji" id="moonEmoji">🌕</div>
+      <div class="hero-tithi">
+        <p class="tithi-name" id="tithiName">Loading…</p>
+        <div class="paksha-label" id="pakshaLabel"></div>
+      </div>
+    </div>
+    <div class="live-tag"><span class="live-dot"></span>Live · updates automatically</div>
+
+    <div class="panch-grid">
+      <div class="panch-item"><div class="label">Nakshatra</div><div class="value" id="valNakshatra">—</div></div>
+      <div class="panch-item"><div class="label">Yoga</div><div class="value" id="valYoga">—</div></div>
+      <div class="panch-item"><div class="label">Karana</div><div class="value" id="valKarana">—</div></div>
+      <div class="panch-item"><div class="label">Vaar</div><div class="value" id="valVaar">—</div></div>
+    </div>
+
+    <div class="sun-row">
+      <span>🌅 Sunrise <b id="valSunrise">—</b></span>
+      <span>🌇 Sunset <b id="valSunset">—</b></span>
+    </div>
+
+    <div class="rahu-note"><b>Rahu Kaal:</b> <span id="valRahu">—</span> — avoid starting new or auspicious work in this window.</div>
+
+    <div class="loc-row">
+      <span id="locLabel">📍 Using approximate location…</span>
+      <button id="locBtn" type="button">Change</button>
+    </div>
+  </div>
+
+  <!-- 7 day strip -->
+  <h2 class="strip-title">Next 7 Days</h2>
+  <div class="strip" id="strip"></div>
+
+  <!-- Festivals -->
+  <h2 class="section-title">Festivals &amp; Vrats <span class="yr">2026</span></h2>
+  <div class="filters" id="filters">
+    <button data-f="upcoming" class="active">Upcoming</button>
+    <button data-f="all">Full Year</button>
+  </div>
+  <div class="fest-list" id="festList"></div>
+
+  <!-- Install -->
+  <div class="install-card">
+    <h3>Install as an app</h3>
+    <p class="lead">Add Panchang to your home screen — it opens full-screen, like a native app, and needs no app store.</p>
+    <button class="install-btn" id="installBtn" style="display:none;">Install App</button>
+
+    <details>
+      <summary>Android · Chrome</summary>
+      <ol>
+        <li>Tap the <b>⋮ menu</b> in the top‑right corner</li>
+        <li>Choose <b>Add to Home screen</b></li>
+        <li>Tap <b>Add</b> to confirm</li>
+      </ol>
+    </details>
+    <details>
+      <summary>iPhone · Safari</summary>
+      <ol>
+        <li>Tap the <b>Share</b> icon (square with an arrow) in the toolbar</li>
+        <li>Scroll down and tap <b>Add to Home Screen</b></li>
+        <li>Tap <b>Add</b> in the top‑right corner</li>
+      </ol>
+    </details>
+  </div>
+
+  <footer>
+    Tithi, Nakshatra, Yoga and Karana are computed live from sun &amp; moon positions and are approximate — accurate to within a tithi near transition times. For exact muhurat timing, confirm with a local panchang or pandit. Sunrise, sunset and Rahu Kaal use your device location when available.
+  </footer>
+</div>
+
+<script>
+/* ============ ASTRONOMY ============ */
+function toJD(date){ return date.getTime()/86400000 + 2440587.5; }
+function rad(d){ return d*Math.PI/180; }
+function deg(r){ return r*180/Math.PI; }
+function norm360(x){ x = x%360; if(x<0) x+=360; return x; }
+
+function sunLongitude(T){
+  const L0 = 280.46646 + 36000.76983*T + 0.0003032*T*T;
+  const M = 357.52911 + 35999.05029*T - 0.0001537*T*T;
+  const Mr = rad(M);
+  const C = (1.914602 - 0.004817*T - 0.000014*T*T)*Math.sin(Mr)
+          + (0.019993 - 0.000101*T)*Math.sin(2*Mr)
+          + 0.000289*Math.sin(3*Mr);
+  return { long: norm360(L0+C), M };
+}
+function moonLongitude(T){
+  const Lp = 218.3164477 + 481267.88123421*T;
+  const D = 297.8501921 + 445267.1114034*T;
+  const M = 357.5291092 + 35999.0502909*T;
+  const Mp = 134.9633964 + 477198.8675055*T;
+  const F = 93.2720950 + 483202.0175233*T;
+  const Dr=rad(D), Mr=rad(M), Mpr=rad(Mp), Fr=rad(F);
+  let dl = 6.288774*Math.sin(Mpr)
+    + 1.274027*Math.sin(2*Dr-Mpr)
+    + 0.658314*Math.sin(2*Dr)
+    + 0.213618*Math.sin(2*Mpr)
+    - 0.185116*Math.sin(Mr)
+    - 0.114332*Math.sin(2*Fr)
+    + 0.058793*Math.sin(2*Dr-2*Mpr)
+    + 0.057066*Math.sin(2*Dr-Mr-Mpr)
+    + 0.053322*Math.sin(2*Dr+Mpr)
+    + 0.045758*Math.sin(2*Dr-Mr)
+    - 0.040923*Math.sin(Mr-Mpr)
+    - 0.034720*Math.sin(Dr)
+    - 0.030383*Math.sin(Mr+Mpr);
+  return norm360(Lp + dl);
+}
+
+const TITHI_NAMES = ["Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi","Purnima"];
+const TITHI_NAMES_K = ["Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi","Amavasya"];
+const NAKSHATRAS = ["Ashwini","Bharani","Krittika","Rohini","Mrigashira","Ardra","Punarvasu","Pushya","Ashlesha","Magha","Purva Phalguni","Uttara Phalguni","Hasta","Chitra","Swati","Vishakha","Anuradha","Jyeshtha","Mula","Purva Ashadha","Uttara Ashadha","Shravana","Dhanishta","Shatabhisha","Purva Bhadrapada","Uttara Bhadrapada","Revati"];
+const YOGAS = ["Vishkambha","Priti","Ayushman","Saubhagya","Shobhana","Atiganda","Sukarman","Dhriti","Shoola","Ganda","Vriddhi","Dhruva","Vyaghata","Harshana","Vajra","Siddhi","Vyatipata","Variyana","Parigha","Shiva","Siddha","Sadhya","Shubha","Shukla","Brahma","Indra","Vaidhriti"];
+const KARANAS_MOVABLE = ["Bava","Balava","Kaulava","Taitila","Garaja","Vanija","Vishti"];
+const KARANAS_FIXED = {1:"Kimstughna",58:"Shakuni",59:"Chatushpada",60:"Naga"};
+const VAAR = ["Sunday (Ravivar)","Monday (Somvar)","Tuesday (Mangalvar)","Wednesday (Budhvar)","Thursday (Guruvar)","Friday (Shukravar)","Saturday (Shanivar)"];
+const MOON_EMOJI = ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"];
+const RAHU_SEGMENT = [8,2,7,5,6,4,3]; // segment index (1-8) by weekday, Sun=0
+
+function computePanchang(date){
+  const T = (toJD(date) - 2451545.0)/36525;
+  const {long: sunLong} = sunLongitude(T);
+  const moonLong = moonLongitude(T);
+  const diff = norm360(moonLong - sunLong);
+
+  const tithiNum = Math.floor(diff/12)+1; // 1..30
+  const paksha = tithiNum<=15 ? "Shukla Paksha" : "Krishna Paksha";
+  const tithiIdx = tithiNum<=15 ? tithiNum-1 : tithiNum-16;
+  const tithiName = tithiNum<=15 ? TITHI_NAMES[tithiIdx] : TITHI_NAMES_K[tithiIdx];
+
+  const nakIdx = Math.floor(norm360(moonLong)/(360/27)) % 27;
+  const yogaIdx = Math.floor(norm360(sunLong+moonLong)/(360/27)) % 27;
+
+  const karanaNum = Math.floor(diff/6)+1; // 1..60
+  let karanaName;
+  if(KARANAS_FIXED[karanaNum]) karanaName = KARANAS_FIXED[karanaNum];
+  else karanaName = KARANAS_MOVABLE[(karanaNum-2)%7];
+
+  const illum = (1-Math.cos(rad(diff)))/2;
+  const phaseBucket = Math.round(diff/45) % 8;
+
+  return {
+    tithiName, paksha, tithiNum,
+    nakshatra: NAKSHATRAS[nakIdx],
+    yoga: YOGAS[yogaIdx],
+    karana: karanaName,
+    vaar: VAAR[date.getDay()],
+    weekday: date.getDay(),
+    moonEmoji: MOON_EMOJI[phaseBucket]
+  };
+}
+
+/* ---- sunrise / sunset (NOAA simplified) ---- */
+function sunTimes(date, lat, lon){
+  const start = Date.UTC(date.getFullYear(),0,1);
+  const N = Math.floor((Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())-start)/86400000)+1;
+  const gamma = 2*Math.PI/365*(N-1);
+  const eqtime = 229.18*(0.000075+0.001868*Math.cos(gamma)-0.032077*Math.sin(gamma)-0.014615*Math.cos(2*gamma)-0.040849*Math.sin(2*gamma));
+  const decl = 0.006918-0.399912*Math.cos(gamma)+0.070257*Math.sin(gamma)-0.006758*Math.cos(2*gamma)+0.000907*Math.sin(2*gamma)-0.002697*Math.cos(3*gamma)+0.00148*Math.sin(3*gamma);
+  const latR = rad(lat);
+  const zenith = rad(90.833);
+  const cosH = (Math.cos(zenith)/(Math.cos(latR)*Math.cos(decl))) - Math.tan(latR)*Math.tan(decl);
+  if(cosH>1 || cosH<-1) return null; // polar day/night edge case
+  const ha = deg(Math.acos(cosH));
+  const solarNoon = 720 - 4*lon - eqtime; // minutes UTC
+  const sunriseMin = solarNoon - 4*ha;
+  const sunsetMin = solarNoon + 4*ha;
+  function toDate(mins){
+    const d = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),0,0,0));
+    d.setUTCMinutes(mins);
+    return d;
+  }
+  return { sunrise: toDate(sunriseMin), sunset: toDate(sunsetMin) };
+}
+function fmtTime(d){
+  return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+}
+function rahuKaal(sunrise,sunset,weekday){
+  const totalMin = (sunset-sunrise)/60000;
+  const seg = totalMin/8;
+  const idx = RAHU_SEGMENT[weekday]-1;
+  const start = new Date(sunrise.getTime()+idx*seg*60000);
+  const end = new Date(sunrise.getTime()+(idx+1)*seg*60000);
+  return fmtTime(start)+" – "+fmtTime(end);
+}
+
+/* ============ LOCATION ============ */
+const CITIES = {
+  "New Delhi":[28.6139,77.2090], "Mumbai":[19.0760,72.8777], "Chennai":[13.0827,80.2707],
+  "Kolkata":[22.5726,88.3639], "Bengaluru":[12.9716,77.5946], "Hyderabad":[17.3850,78.4867],
+  "Jaipur":[26.9124,75.7873], "Varanasi":[25.3176,82.9739], "Ahmedabad":[23.0225,72.5714],
+  "Pune":[18.5204,73.8567]
+};
+let userLoc = {lat:28.6139, lon:77.2090, label:"New Delhi (default)"};
+
+function loadLoc(){
+  try{
+    const saved = JSON.parse(localStorage.getItem('panchangLoc')||'null');
+    if(saved) userLoc = saved;
+  }catch(e){}
+}
+function saveLoc(){ try{ localStorage.setItem('panchangLoc', JSON.stringify(userLoc)); }catch(e){} }
+
+function tryGeolocate(){
+  if(!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    userLoc = {lat:pos.coords.latitude, lon:pos.coords.longitude, label:"Your location"};
+    saveLoc(); render();
+  }, ()=>{ /* denied — keep default/saved */ }, {timeout:6000});
+}
+
+document.getElementById('locBtn').addEventListener('click', ()=>{
+  const names = Object.keys(CITIES);
+  const choice = prompt("Type a city name:\n"+names.join(", ")+"\n\n(or type 'gps' to use your device location)");
+  if(!choice) return;
+  if(choice.trim().toLowerCase()==='gps'){ tryGeolocate(); return; }
+  const match = names.find(n=>n.toLowerCase()===choice.trim().toLowerCase());
+  if(match){ userLoc = {lat:CITIES[match][0], lon:CITIES[match][1], label:match}; saveLoc(); render(); }
+  else alert("City not found in the list — try one from the list, or 'gps'.");
+});
+
+/* ============ FESTIVALS 2026 ============ */
+const FESTIVALS = [
+  ["2026-01-03","Pausha Purnima","Full moon of the Pausha month"],
+  ["2026-01-06","Sakat Chauth","Fast observed for Lord Ganesha"],
+  ["2026-01-13","Lohri","Punjab's harvest bonfire festival"],
+  ["2026-01-14","Makar Sankranti / Pongal","Sun's transit into Capricorn"],
+  ["2026-01-23","Vasant Panchami","Saraswati Puja, arrival of spring"],
+  ["2026-01-25","Ratha Saptami","Day of Sun worship"],
+  ["2026-02-15","Maha Shivaratri","The great night of Lord Shiva"],
+  ["2026-03-03","Holika Dahan","Bonfire on the eve of Holi"],
+  ["2026-03-04","Holi","Festival of colours"],
+  ["2026-03-19","Chaitra Navratri Begins","Also Gudi Padwa / Ugadi"],
+  ["2026-03-27","Ram Navami","Birth of Lord Rama"],
+  ["2026-04-02","Hanuman Jayanti","Birth of Lord Hanuman"],
+  ["2026-04-14","Vishu / Puthandu","Tamil and Malayalam New Year"],
+  ["2026-04-20","Akshaya Tritiya","Auspicious day for new beginnings"],
+  ["2026-05-01","Buddha Purnima","Birth of Gautama Buddha"],
+  ["2026-07-16","Jagannath Rath Yatra","Chariot festival at Puri"],
+  ["2026-07-29","Guru Purnima","Honouring teachers and gurus"],
+  ["2026-08-26","Onam","Kerala's harvest festival"],
+  ["2026-08-28","Raksha Bandhan","Bond between brothers and sisters"],
+  ["2026-09-04","Janmashtami","Birth of Lord Krishna"],
+  ["2026-09-14","Ganesh Chaturthi","Arrival of Lord Ganesha"],
+  ["2026-09-25","Anant Chaturdashi","Ganesh Visarjan"],
+  ["2026-10-11","Sharad Navratri Begins","Nine nights of the Goddess"],
+  ["2026-10-20","Dussehra / Vijayadashami","Victory of good over evil"],
+  ["2026-10-29","Karva Chauth","Fast for a spouse's wellbeing"],
+  ["2026-11-06","Dhanteras","Start of Diwali festivities"],
+  ["2026-11-07","Narak Chaturdashi","Choti Diwali"],
+  ["2026-11-08","Diwali","Festival of lights"],
+  ["2026-11-09","Govardhan Puja","Worship of Govardhan hill"],
+  ["2026-11-11","Bhai Dooj","Bond between brothers and sisters"],
+  ["2026-11-17","Chhath Puja","Sun god worship, popular in Bihar/UP"],
+  ["2026-12-23","Dattatreya Jayanti","Birth of Lord Dattatreya"]
+];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+
+function renderFestivals(filter){
+  const list = document.getElementById('festList');
+  list.innerHTML='';
+  const today = new Date(); today.setHours(0,0,0,0);
+  let items = FESTIVALS.map(([d,name,note])=>({date:new Date(d+"T00:00:00"), name, note}));
+  if(filter==='upcoming') items = items.filter(f=>daysBetween(today,f.date) >= -0);
+  let nextShown = false;
+  items.forEach(f=>{
+    const diffDays = daysBetween(today,f.date);
+    const el = document.createElement('div');
+    el.className = 'fest-item' + (!nextShown && diffDays>=0 ? ' next' : '');
+    let badge = '';
+    if(diffDays===0) badge='Today';
+    else if(diffDays===1) badge='Tomorrow';
+    else if(diffDays>1) badge='In '+diffDays+' days';
+    else badge='';
+    if(diffDays>=0) nextShown = true;
+    el.innerHTML = `
+      <div class="fest-date"><div class="d">${f.date.getDate()}</div><div class="m">${MONTHS[f.date.getMonth()]}</div></div>
+      <div class="fest-info"><div class="name">${f.name}</div><div class="note">${f.note}</div></div>
+      <div class="fest-badge">${badge}</div>`;
+    list.appendChild(el);
+  });
+}
+
+document.getElementById('filters').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  [...document.querySelectorAll('#filters button')].forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  renderFestivals(e.target.dataset.f);
+});
+
+/* ============ RENDER ============ */
+function render(){
+  const now = new Date();
+  document.getElementById('todayDate').firstChild.textContent =
+    now.toLocaleDateString(undefined,{weekday:'long', year:'numeric', month:'long', day:'numeric'});
+
+  const p = computePanchang(now);
+  document.getElementById('hinduDate').textContent = p.tithiName+", "+p.paksha;
+  document.getElementById('tithiName').textContent = p.tithiName;
+  document.getElementById('pakshaLabel').textContent = p.paksha+" · "+p.vaar;
+  document.getElementById('moonEmoji').textContent = p.moonEmoji;
+  document.getElementById('valNakshatra').textContent = p.nakshatra;
+  document.getElementById('valYoga').textContent = p.yoga;
+  document.getElementById('valKarana').textContent = p.karana;
+  document.getElementById('valVaar').textContent = p.vaar.split(' ')[0];
+
+  document.getElementById('locLabel').textContent = "📍 "+userLoc.label;
+  const st = sunTimes(now, userLoc.lat, userLoc.lon);
+  if(st){
+    document.getElementById('valSunrise').textContent = fmtTime(st.sunrise);
+    document.getElementById('valSunset').textContent = fmtTime(st.sunset);
+    document.getElementById('valRahu').textContent = rahuKaal(st.sunrise, st.sunset, now.getDay());
+  }
+
+  // 7 day strip
+  const strip = document.getElementById('strip');
+  strip.innerHTML='';
+  for(let i=0;i<7;i++){
+    const d = new Date(now); d.setDate(now.getDate()+i); d.setHours(12,0,0,0);
+    const dp = computePanchang(d);
+    const el = document.createElement('div');
+    el.className = 'day'+(i===0?' today':'');
+    el.innerHTML = `<div class="dow">${d.toLocaleDateString(undefined,{weekday:'short'})}</div>
+      <div class="dnum">${d.getDate()}</div>
+      <div class="tname">${dp.tithiName}</div>`;
+    strip.appendChild(el);
+  }
+
+  renderFestivals(document.querySelector('#filters button.active').dataset.f);
+}
+
+loadLoc();
+render();
+setInterval(render, 60000);
+if(!localStorage.getItem('panchangLoc')) tryGeolocate();
+
+/* ============ INSTALL PROMPT ============ */
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBtn').style.display='block';
+});
+document.getElementById('installBtn').addEventListener('click', async ()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('installBtn').style.display='none';
+});
+</script>
+</body>
+</html>
