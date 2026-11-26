@@ -21,6 +21,7 @@ window.TOOL_CATALOG = [
       T("Hash Generator","SHA-1, SHA-256, SHA-384 and SHA-512","apps/developer/dev-tools/index.html#hash",["hash","sha","checksum","digest"])]},
     { name:"Format & Generate", tools:[
       T("JSON Formatter","Format, minify and filter JSON keys","apps/developer/dev-tools/index.html#json",["json","format","minify","validate","keys"]),
+      T("HTML Viewer","Paste HTML and preview it live","apps/developer/dev-tools/index.html#html",["html","viewer","preview","render","markup"]),
       T("Text Case Converter","UPPER, camelCase, snake_case and more","apps/developer/dev-tools/index.html#case",["text","case","uppercase","lowercase","camel","snake"]),
       T("UTC Time & Converter","Live UTC clock and epoch converter","apps/developer/dev-tools/index.html#time",["utc","time","epoch","unix","timestamp"]),
       T("UUID Generator","Random v4 UUIDs in bulk","apps/developer/dev-tools/index.html#uuid",["uuid","guid","random","id"]),

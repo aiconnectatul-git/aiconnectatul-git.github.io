@@ -58,7 +58,7 @@ function Suite(cfg){
   function mount(){
     const id=(location.hash||"#"+T[0].id).slice(1);const t=T.find(x=>x.id===id)||T[0];
     leave.forEach(f=>{try{f()}catch(e){}});leave=[];
-    $("nav").innerHTML=T.map(x=>`<a href="#${x.id}" class="${x===t?"on":""}"><i>${x.ico}</i>${x.name}</a>`).join("");
+    $("nav").innerHTML=T.map(x=>`<a href="#${x.id}" class="${x===t?"on":""}"><i>${esc(x.ico)}</i>${x.name}</a>`).join("");
     document.title=`${t.name} — ${cfg.name}`;localStorage.setItem(`suite:${cfg.slug}:last`,t.id);
     const head=`<div class="thead"><div class="kicker">${cfg.name.toUpperCase()}</div><h1>${t.name}</h1><p class="desc">${t.desc}</p></div>`;
     if(t.render){$("main").innerHTML=head;t.render($("main"),ctx);return}

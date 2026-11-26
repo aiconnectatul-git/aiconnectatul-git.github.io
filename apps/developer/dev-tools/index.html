@@ -92,6 +92,9 @@ body:has(.main.fill){padding-bottom:18px}
 .krow .kn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.krow .kc{margin-left:auto;font-size:10px;color:var(--muted)}
 .kempty{padding:14px;color:#5d6e86;font-size:12.5px}
 @media(max-width:860px){.stage.k3{grid-template-columns:minmax(0,1fr)}.klist{max-height:240px}}
+.pvwrap{flex:1;min-height:260px;margin:14px 18px 14px;border-radius:12px;background:#fff;overflow:auto;display:flex;justify-content:center;background-image:linear-gradient(45deg,#f1f3f7 25%,transparent 25%,transparent 75%,#f1f3f7 75%),linear-gradient(45deg,#f1f3f7 25%,transparent 25%,transparent 75%,#f1f3f7 75%);background-size:16px 16px;background-position:0 0,8px 8px}
+.pvwrap iframe{width:100%;height:100%;min-height:260px;border:0;background:#fff;transition:width .25s;box-shadow:0 0 0 1px #0000000f}
+.main.fill .pvwrap{min-height:0}
 .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--mint);color:#0b1f1a;font-weight:700;font-size:13px;padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:.25s;z-index:9}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media(max-width:860px){
@@ -279,6 +282,50 @@ render(){
   onclick("clear",()=>{setVal("i","");off.clear();run();$("i").focus()});onclick("copy",()=>copyText(getVal("o")));
   onclick("sample",()=>{off.clear();setVal("i",'{"name":"UtilityBox","tools":[{"id":"base64","free":true},{"id":"jwt","free":true}],"meta":{"free":true,"version":1.2,"author":{"name":"Atul","site":"stackline.space"}}}');run()});run()}});
 
+/* HTML Viewer */
+TOOLS.push({id:"html",fill:1,ico:"</>",name:"HTML Viewer",desc:"Paste HTML and see it rendered live in a sandboxed preview.",
+render(){
+  const W={full:"100%",tab:"768px",mob:"375px"};
+  $("main").innerHTML=head(this)+`<div class="stage two">${pane("i","HTML",{ph:"<h1>Hello</h1>\n<p>Paste or type HTML here…</p>",tools:chip("sample","Sample")+chip("file","↑ File")+chip("clear","Clear")})}
+  <section class="card" id="pvCard"><div class="chead"><span class="label">PREVIEW</span><div class="tools">${chip("w_full","Full","on")}${chip("w_tab","Tablet")}${chip("w_mob","Mobile")}${chip("dl","↓ Save")}</div></div>
+  <div class="pvwrap"><iframe id="pv" title="HTML preview" sandbox="allow-popups allow-forms allow-modals"></iframe></div>
+  <div class="cfoot"><span id="pvStat"></span><span class="msg" id="pvMsg"></span></div></section></div>
+  <div class="opts">${sw("js","Run scripts")}<span class="hint">Preview is sandboxed — it can’t read this page or your data</span></div><input type="file" id="fileIn" accept=".html,.htm,.svg,.txt" hidden>`;
+  let tm;const pv=$("pv");
+  function run(){const v=getVal("i");
+    pv.setAttribute("sandbox","allow-popups allow-forms allow-modals"+($("js").checked?" allow-scripts":""));
+    pv.srcdoc=v||'<p style="font:14px system-ui;color:#888;padding:20px">Your preview appears here.</p>';
+    stat("i",`<b>${v.length}</b> chars · <b>${v?v.split("\n").length:0}</b> lines`);
+    const tags=(v.match(/<([a-zA-Z][\w-]*)/g)||[]).length;stat("pv",`<b>${tags}</b> elements`);
+    $("pvMsg").textContent=$("js").checked?"Scripts on":"";$("pvMsg").className="msg "+($("js").checked?"good":"")}
+  const later=()=>{clearTimeout(tm);tm=setTimeout(run,250)};
+  bind("i",later);$("js").onchange=run;
+  Object.keys(W).forEach(k=>onclick("w_"+k,()=>{pv.style.width=W[k];Object.keys(W).forEach(x=>$("w_"+x).classList.toggle("on",x===k))}));
+  onclick("clear",()=>{setVal("i","");run();$("i").focus()});
+  onclick("file",()=>$("fileIn").click());$("fileIn").onchange=async e=>{const f=e.target.files[0];if(f){setVal("i",await f.text());run()}};
+  onclick("dl",()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([getVal("i")],{type:"text/html"}));a.download="page.html";a.click();URL.revokeObjectURL(a.href)});
+  onclick("sample",()=>{setVal("i",`<!doctype html>
+<html>
+<head>
+<style>
+  body{font-family:system-ui;margin:0;padding:32px;background:#f6f7fb;color:#1a1d29}
+  .card{max-width:420px;background:#fff;border-radius:16px;padding:24px;box-shadow:0 10px 30px #0001}
+  h1{margin:0 0 8px;font-size:24px}
+  button{background:#3158f5;color:#fff;border:0;border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Hello from the HTML Viewer 👋</h1>
+    <p>Edit this HTML on the left and the preview updates live.</p>
+    <button onclick="this.textContent='Scripts are running!'">Click me</button>
+  </div>
+</body>
+</html>`);run()});
+  const card=$("iCard");["dragenter","dragover"].forEach(t=>card.addEventListener(t,e=>{e.preventDefault();card.classList.add("drag")}));["dragleave","drop"].forEach(t=>card.addEventListener(t,e=>{e.preventDefault();card.classList.remove("drag")}));
+  card.addEventListener("drop",async e=>{const f=e.dataTransfer.files[0];if(f){setVal("i",await f.text());run()}});
+  run()}});
+
 /* Hash */
 TOOLS.push({id:"hash",ico:"#",name:"Hash Generator",desc:"SHA-1, SHA-256, SHA-384 and SHA-512 digests of your text — computed in-browser.",
 render(){
@@ -314,7 +361,7 @@ render(){
 
 /* ---------- Router ---------- */
 function mount(){const id=(location.hash||"#base64").slice(1);const t=TOOLS.find(x=>x.id===id)||TOOLS[0];cleanup();cleanup=()=>{};
-  $("nav").innerHTML=TOOLS.map(x=>`<a href="#${x.id}" class="${x===t?"on":""}"><i>${x.ico}</i>${x.name}</a>`).join("");
+  $("nav").innerHTML=TOOLS.map(x=>`<a href="#${x.id}" class="${x===t?"on":""}"><i>${esc(x.ico)}</i>${x.name}</a>`).join("");
   $("main").classList.toggle("fill",!!t.fill);t.render();document.title=t.name+" — Dev Tools";localStorage.setItem("devtools_last",t.id)}
 addEventListener("hashchange",()=>{mount();scrollTo({top:0})});
 if(!location.hash){const l=localStorage.getItem("devtools_last");if(l&&TOOLS.some(x=>x.id===l))history.replaceState(null,"","#"+l)}
